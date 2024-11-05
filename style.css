@@ -14,6 +14,7 @@ body {
     width: 100%;
     min-height: 100vh;
     background-color: #fafafa;
+    overflow-y: auto;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
@@ -57,11 +58,7 @@ body {
 
 .whatsapp:hover {
     animation: moveOn 1.5s linear infinite !important;
-
 }
-
-
-
 .blur {
     backdrop-filter: blur(10px) !important;
     filter: blur(10px) !important;
