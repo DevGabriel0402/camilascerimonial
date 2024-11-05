@@ -1,15 +1,15 @@
 {
   window.onload = () => {
-
-    setTimeout(() => {
-      document.getElementById(`loading`).classList.add(`hidden`);
-      document.getElementById(`container`).classList.remove(`hidden`);
-      document.getElementById(`whatsapp-icon`).classList.remove(`hidden`);
-      document.getElementById(`card-contrate`).classList.remove(`hidden`);
-      document.getElementById(`footer`).classList.remove(`hidden`);
-    }, 800);
-
-
+    setTimeout(
+      () => {
+        document.getElementById(`loading`).classList.add(`hidden`);
+        document.getElementById(`container`).classList.remove(`hidden`);
+        document.getElementById(`whatsapp-icon`).classList.remove(`hidden`);
+        document.getElementById(`card-contrate`).classList.remove(`hidden`);
+        document.getElementById(`footer`).classList.remove(`hidden`);
+      },
+     1500
+    );
   };
   setTimeout(() => {
     document.getElementById(
@@ -23,6 +23,7 @@
       pagination: {
         el: ".swiper-pagination",
         clickable: true,
+        dynamicBullets: true,
       },
       navigation: {
         nextEl: ".swiper-button-next",
@@ -36,6 +37,7 @@
       pagination: {
         el: ".swiper-pagination",
         clickable: true,
+        dynamicBullets: true,
       },
       navigation: {
         nextEl: ".swiper-button-next",
