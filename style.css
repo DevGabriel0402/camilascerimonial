@@ -456,6 +456,7 @@ body {
     gap: 8px;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .proposta .buttons .btn img {

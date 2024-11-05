@@ -96,3 +96,14 @@
     }
   });
 }
+
+document.getElementById('btn-completo').addEventListener('click', () => {
+  const url = './src/Proposta Assessoria.pdf'
+  window.open(url, '_blank')
+})
+
+document.getElementById('btn-cerimonial').addEventListener('click', () => {
+  const url = './src/proposta cerimonial.pdf'
+  window.open(url, '_blank')
+})
+
