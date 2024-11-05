@@ -73,11 +73,12 @@ body {
 
 .modal {
     width: 100%;
-    min-height: 600px;
+    min-height: 100vh;
     overflow: hidden;
     position: fixed;
     z-index: 999;
-    display: none;
+    display: flex;
+    background-color: transparent;
     align-items: center;
     justify-content: center;
 }
