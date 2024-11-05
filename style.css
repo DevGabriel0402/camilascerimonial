@@ -73,9 +73,10 @@ body {
 
 .modal {
     width: 100%;
-    min-height: 90vh;
+    min-height: 100vh;
     overflow: hidden;
     position: fixed;
+    top: 0;
     z-index: 999;
     display: none;
     background-color: transparent;
@@ -188,7 +189,7 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    background-color: #f3d38f90;
+    background-color: #f3d38fce;
     padding: 10px;
     bottom: 40px;
     border-radius: 16px;
