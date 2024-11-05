@@ -162,7 +162,7 @@ body {
 #formulario button {
     height: 30px;
     border: none;
-    background-color: #fafafa;
+    background-color: var(--primary-color);
     color: var(--secundary-color);
     border-radius: 8px;
     font-size: 16px;
