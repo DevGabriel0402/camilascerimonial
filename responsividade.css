@@ -1,0 +1,71 @@
+@media (max-width: 768px) {
+    .whatsapp {
+        display: none;
+    }
+
+    .perfil {
+        margin-inline: 40px;
+    }
+
+    .card-container {
+        padding-inline: 40px;
+    }
+}
+
+@media(max-width: 467px) {
+
+    .whatsapp {
+        display: none;
+    }
+
+    .perfil {
+        margin-inline: 20px;
+        padding: 20px;
+        max-width: 100% !important;
+    }
+
+    .perfil>img {
+        width: 100px;
+        height: fit-content;
+    }
+
+    .perfil-info .name-title {
+        font-size: 20px;
+    }
+
+    .perfil-info .description {
+        font-size: 12px;
+    }
+
+    .perfil-info img {
+        width: 38px;
+    }
+
+    .card-contrate {
+        max-width: 350px;
+    }
+
+    .card-contrate p {
+        font-size: 12px;
+        -webkit-text-stroke: 0.1px black;
+
+
+    }
+
+    .card-contrate p span {
+        font-size: 12px;
+        -webkit-text-stroke: 0.05px black;
+
+    }
+
+    .card-container {
+        width: 100%;
+        padding-inline: 40px;
+    }
+
+    .card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 350px) {}
