@@ -8,7 +8,7 @@
         document.getElementById(`card-contrate`).classList.remove(`hidden`);
         document.getElementById(`footer`).classList.remove(`hidden`);
       },
-     1500
+      1500
     );
   };
   setTimeout(() => {
@@ -82,7 +82,7 @@
 
     const uri = encodeURIComponent(mensagem);
 
-    const contato = '31993720268';
+    const contato = '31991660268';
 
     const url = `https://wa.me/55${contato}?text=${uri}`;
 
@@ -107,3 +107,7 @@ document.getElementById('btn-cerimonial').addEventListener('click', () => {
   window.open(url, '_blank')
 })
 
+document.getElementById("creator").onclick = () => {
+  const url = "https://www.instagram.com/eu.gabrielvieira/";
+  window.open(url, "_blank")
+}

@@ -2,24 +2,24 @@
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Juntos transformando sonhos em realidade.">
-    <link rel="shortcut icon" href="./src/Favicon.png" type="image/x-icon">
-    <link rel="apple-touch-icon" href="./src/Favicon.png">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="responsividade.css">
-    <link rel="stylesheet" href="animation.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Juntos transformando sonhos em realidade." />
+    <link rel="shortcut icon" href="./src/Favicon.png" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="./src/Favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="responsividade.css" />
+    <link rel="stylesheet" href="animation.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
-    
+
     <script src="index.js" defer></script>
     <title>Camila's Cerimonial - Links</title>
 </head>
 
 <body id="body">
-    <a class="whatsapp hidden" id="whatsapp-icon" href="https://wa.me/5531993720268" target="_blank"><img
-            src="./src/whatsApp-icon.svg" alt="whatsApp-icon"></a>
+    <a class="whatsapp hidden" id="whatsapp-icon" href="https://wa.me/5531991660268" target="_blank"><img
+            src="./src/whatsApp-icon.svg" alt="whatsApp-icon" /></a>
     <div class="loading" id="loading">
         <div class="bar-loading"></div>
     </div>
@@ -29,7 +29,7 @@
         <form id="formulario" class="">
             <div id="btn-fechar">&times;</div>
             <h2>Preencha o formulário</h2>
-            <input type="text" id="inputName" placeholder="Informe seu nome..." required>
+            <input type="text" id="inputName" placeholder="Informe seu nome..." required />
             <div class="container-select">
                 <select id="select" required>
                     <option value="nenhum" selected>Selecione o tipo do evento</option>
@@ -37,21 +37,25 @@
                     <option value="Festa de 15 anos">Festa de 15 anos</option>
                     <option value="Casamento">Casamento</option>
                     <option value="Assessoria">Assessoria</option>
-                    <option value="Assessoria e Casamento completo">Assessoria e casamento completo</option>
+                    <option value="Assessoria e Casamento completo">
+                        Assessoria e casamento completo
+                    </option>
                     <option value="Outros">Outros</option>
                 </select>
             </div>
             <textarea rows="6" id="inputText" placeholder="Envie uma mensagem (opcional)..."></textarea>
             <button id="enviar">Solicitar Orçamento</button>
-
         </form>
     </div>
 
     <!-- Contrate Já -->
     <div class="card-contrate hidden" id="card-contrate">
         <div class="right">
-            <img src="./src/logo.png" alt="Logo">
-            <p>Faça seu Orçamento!<br> <span>E nos permita transformar seus sonhos em realidade!</span></p>
+            <img src="./src/logo.png" alt="Logo" />
+            <p>
+                Faça seu Orçamento!<br />
+                <span>E nos permita transformar seus sonhos em realidade!</span>
+            </p>
         </div>
         <button id="btn-contato">Conversar</button>
     </div>
@@ -60,7 +64,7 @@
     <div class="container hidden" id="container">
         <!-- Perfil -->
         <div class="perfil">
-            <img width="100px" src="./src/logo.png" alt="Foto de Perfil">
+            <img width="100px" src="./src/logo.png" alt="Foto de Perfil" />
             <div class="perfil-info">
                 <h1 class="name-title">Camila`s Cerimonial</h1>
                 <p class="description">Juntos transformando sonhos em realidade.</p>
@@ -94,29 +98,57 @@
 
         <!-- Cards Link -->
         <div class="card-container">
-            <div class="card">
-                Veja alguns sonhos que já realizamos!
-            </div>
+            <div class="card">Veja alguns sonhos que já realizamos!</div>
         </div>
 
         <!-- Carrossel -->
         <div class="swiper mySwiper">
             <div class="swiper-wrapper">
-                <div class="swiper-slide"><img class="image-slide" src="./images/12.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/10.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img style="object-position: top;" class="image-slide" src="./images/15.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/13.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/05.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/06.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/07.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/08.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/09.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/02.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img style="object-position: top;" class="image-slide" src="./images/11.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img style="object-position: top;" class="image-slide" src="./images/01.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/04.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/14.webp" alt="image-slide"></div>
-                <div class="swiper-slide"><img class="image-slide" src="./images/03.webp" alt="image-slide"></div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/12.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/10.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img style="object-position: top" class="image-slide" src="./images/15.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/13.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/05.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/06.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/07.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/08.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/09.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/02.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img style="object-position: top" class="image-slide" src="./images/11.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img style="object-position: top" class="image-slide" src="./images/01.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/04.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/14.webp" alt="image-slide" />
+                </div>
+                <div class="swiper-slide">
+                    <img class="image-slide" src="./images/03.webp" alt="image-slide" />
+                </div>
             </div>
             <div class="swiper-button-next"></div>
             <div class="swiper-button-prev"></div>
@@ -127,10 +159,8 @@
         <div class="proposta" id="proposta">
             <h1>Baixe agora nossas propostas!</h1>
             <div class="buttons">
-                <a id="btn-completo" class="btn">Completa <img
-                        src="./src/download.svg" alt=""></a>
-                <a id="btn-cerimonial" class="btn">Cerimonial <img
-                        src="./src/download.svg" alt=""></a>
+                <a id="btn-completo" class="btn">Completa <img src="./src/download.svg" alt="" /></a>
+                <a id="btn-cerimonial" class="btn">Cerimonial <img src="./src/download.svg" alt="" /></a>
             </div>
         </div>
         <!-- Faixa -->
@@ -163,8 +193,10 @@
         </div>
     </div>
 
-    <footer class="hidden" id="footer"> Camila`s Cerimonial &copy; 2022 . Todos os direitos reservados.</footer>
-
+    <footer class="hidden" id="footer">
+        Camila`s Cerimonial &copy; 2022 . Todos os direitos reservados.
+        <p>Desenvolvido por <span id="creator">Gabriel.</span></p>
+    </footer>
 </body>
 
 </html>
