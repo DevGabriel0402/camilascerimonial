@@ -107,12 +107,8 @@ document.getElementById('btn-cerimonial').addEventListener('click', () => {
   window.open(url, '_blank')
 })
 
-<<<<<<< HEAD
 document.getElementById("creator").onclick = () => {
   const url = "https://www.instagram.com/eu.gabrielvieira/";
   window.open(url, "_blank")
 }
-=======
 
-
->>>>>>> 6886ee1 (Invertento)
