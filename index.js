@@ -82,7 +82,7 @@
 
     const uri = encodeURIComponent(mensagem);
 
-    const contato = '31993720268';
+    const contato = '31985165246';
 
     const url = `https://wa.me/55${contato}?text=${uri}`;
 
