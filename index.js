@@ -73,12 +73,12 @@
     const tipoEvento = document.getElementById(`select`).value;
 
     const mensagem = `
-    Olá Camila's Cerimonial tudo bem? Meu nome é ${nome} e estou entrando em contato para fazer um orçamento, segue as informações:
+Olá Camila's Cerimonial tudo bem? Meu nome é ${nome} e estou entrando em contato para fazer um orçamento, segue as informações:
 
-    *Tipo de Evento:* ${tipoEvento}
-    *Observação:* ${texto}
+*Tipo de Evento:* ${tipoEvento}
+*Observação:* ${texto}
     
-    Aguardando sua resposta.`;
+Aguardando sua resposta.`;
 
     const uri = encodeURIComponent(mensagem);
 
