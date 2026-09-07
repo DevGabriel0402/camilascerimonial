@@ -1,0 +1,96 @@
+@keyframes enterCard {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translatey(0)
+    }
+}
+
+@keyframes animaFaixa {
+
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+        /* Mova 100% para a esquerda */
+    }
+
+}
+
+
+@keyframes loadingAnimate {
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+
+    }
+
+}
+
+
+@keyframes fadeInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-200px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+
+    }
+
+}
+
+@keyframes fadeInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(200px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+
+    }
+
+}
+
+@keyframes moveOn {
+    0% {
+        transform: rotate(0);
+    }
+
+    25% {
+        transform: rotate(10deg);
+
+    }
+
+    50% {
+        transform: rotate(0deg);
+
+    }
+
+    75% {
+        transform: rotate(15deg);
+    }
+}
