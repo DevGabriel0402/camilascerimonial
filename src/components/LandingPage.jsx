@@ -9,6 +9,11 @@ import eventPhoto07 from '../../images/07.webp';
 import eventPhoto08 from '../../images/08.webp';
 import eventPhoto09 from '../../images/09.webp';
 import eventPhoto02 from '../../images/02.webp';
+import eventPhoto01 from '../../images/01.webp';
+import eventPhoto03 from '../../images/03.webp';
+import eventPhoto04 from '../../images/04.webp';
+import eventPhoto11 from '../../images/11.webp';
+import eventPhoto14 from '../../images/14.webp';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -20,7 +25,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-export default function LandingPage({ proposals, onSelectProposalForPdf }) {
+export default function LandingPage({ proposals, siteContent, onSelectProposalForPdf }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [proposalModalType, setProposalModalType] = useState(null); // 'completa' | 'cerimonial' | null
   const [loading, setLoading] = useState(true);
@@ -54,9 +59,9 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       return;
     }
 
-    const mensagem = `Olá Camila's Cerimonial! Meu nome é ${formName}.\n\n*Tipo de Evento:* ${eventType}\n*Estimativa de Convidados:* ${guestCount || 'Não informado'}\n*Observações:* ${formText || 'Sem observações'}\n\nGostaria de solicitar um orçamento e consultar datas!`;
+    const mensagem = `Olá ${siteContent.brandName}! Meu nome é ${formName}.\n\n*Tipo de Evento:* ${eventType}\n*Estimativa de Convidados:* ${guestCount || 'Não informado'}\n*Observações:* ${formText || 'Sem observações'}\n\nGostaria de solicitar um orçamento e consultar datas!`;
     const uri = encodeURIComponent(mensagem);
-    const contato = '31985165246';
+    const contato = siteContent.whatsappPhone;
     const url = `https://wa.me/55${contato}?text=${uri}`;
     window.open(url, '_blank');
   };
@@ -108,18 +113,9 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
     setClientData({ name: '', phone: '', email: '', cpf: '', guestTierId: '' });
   };
 
-  const carouselImages = [
-    { url: eventPhoto12, title: 'Casamentos Inesquecíveis' },
-    { url: eventPhoto10, title: 'Momentos Mágicos' },
-    { url: eventPhoto15, title: 'Festas de 15 Anos' },
-    { url: eventPhoto13, title: 'Decoração & Sofisticação' },
-    { url: eventPhoto05, title: 'Eventos Exclusivos' },
-    { url: eventPhoto06, title: 'Cerimônias ao Ar Livre' },
-    { url: eventPhoto07, title: 'Produção Completa' },
-    { url: eventPhoto08, title: 'Atenção a Cada Detalhe' },
-    { url: eventPhoto09, title: 'Sonhos Realizados' },
-    { url: eventPhoto02, title: 'Equipe Especializada' },
-  ];
+  const photoSources = { '01': eventPhoto01, '02': eventPhoto02, '03': eventPhoto03, '04': eventPhoto04, '05': eventPhoto05, '06': eventPhoto06, '07': eventPhoto07, '08': eventPhoto08, '09': eventPhoto09, '10': eventPhoto10, '11': eventPhoto11, '12': eventPhoto12, '13': eventPhoto13, '14': eventPhoto14, '15': eventPhoto15 };
+  const carouselImages = siteContent.gallery.map(image => ({ ...image, url: photoSources[image.photo] || eventPhoto01 }));
+  const brandLogo = siteContent.logoUrl || logo;
 
   if (loading) {
     return (
@@ -135,24 +131,24 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Floating WhatsApp */}
       <a
         className="whatsapp-float"
-        href="https://wa.me/5531985165246"
+        href={`https://wa.me/55${siteContent.whatsappPhone}`}
         target="_blank"
         rel="noopener noreferrer"
-        title="Falar no WhatsApp"
+        title={`Falar com ${siteContent.brandName} no WhatsApp`}
       >
         <MessageCircle size={26} />
       </a>
 
       {/* Header Bar */}
       <header className="header-nav">
-        <a href="#" className="brand-logo-container" title="Camila's Cerimonial">
-          <img src={logo} alt="Camila's Cerimonial Logo" className="brand-logo-img" />
-          <div className="brand-name" style={{ fontSize: '18px' }}>Camila's Cerimonial</div>
+        <a href="#" className="brand-logo-container" title={siteContent.brandName}>
+          <img src={brandLogo} alt={`Logo ${siteContent.brandName}`} className="brand-logo-img" />
+          <div className="brand-name" style={{ fontSize: '18px' }}>{siteContent.brandName}</div>
         </a>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button className="btn-gold" onClick={() => setModalOpen(true)}>
-            Solicitar Orçamento
+            {siteContent.contactButton}
           </button>
 
           <Link to="/admin" className="admin-icon-btn" title="Área do Administrador">
@@ -163,32 +159,22 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <img src={logo} alt="Camila Cerimonial" className="profile-avatar" />
+        <img src={brandLogo} alt={siteContent.brandName} className="profile-avatar" />
 
         <h1 className="hero-title">
-          Juntos transformando <span className="gold-accent">sonhos em realidade</span>
+          {siteContent.heroLead} <span className="gold-accent">{siteContent.heroAccent}</span>
         </h1>
 
         <p className="hero-subtitle">
-          Assessoria e cerimonial dedicados a cuidar de cada detalhe do seu casamento, festa de 15 anos ou evento especial.
+          {siteContent.heroSubtitle}
         </p>
 
         {/* Stats Badges */}
         <div className="stats-badge-grid">
-          <div className="stat-item">
-            <div className="stat-num">150+</div>
-            <div className="stat-label">Sonhos Realizados</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              5.0 <Star size={18} fill="var(--primary-gold)" color="var(--primary-gold)" />
-            </div>
-            <div className="stat-label">Avaliação dos Clientes</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num">100%</div>
-            <div className="stat-label">Dedicação</div>
-          </div>
+          {siteContent.stats.map((stat, index) => <div className="stat-item" key={index}>
+            <div className="stat-num" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{stat.value} {stat.star && <Star size={18} fill="var(--primary-gold)" color="var(--primary-gold)" />}</div>
+            <div className="stat-label">{stat.label}</div>
+          </div>)}
         </div>
       </section>
 
@@ -197,7 +183,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
         <div className="marquee-content">
           {Array.from({ length: 10 }).map((_, idx) => (
             <div className="marquee-item" key={idx}>
-              <span>Cerimonial e Assessoria ● Planejamento Completo ● Cuidado em Cada Detalhe</span>
+              <span>{siteContent.marqueeText}</span>
             </div>
           ))}
         </div>
@@ -206,9 +192,9 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Portfolio Gallery Swiper - BEFORE proposals */}
       <section className="section-container" style={{ marginTop: '50px' }}>
         <div className="section-header">
-          <div className="section-tag">Galeria de Eventos</div>
+          <div className="section-tag">{siteContent.galleryTag}</div>
           <h2 className="section-title">
-            Veja alguns <span className="navy-accent">momentos inesquecíveis</span>
+            {siteContent.galleryLead} <span className="navy-accent">{siteContent.galleryAccent}</span>
           </h2>
         </div>
 
@@ -238,9 +224,9 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Package Cards (Propostas) */}
       <section className="section-container">
         <div className="section-header">
-          <div className="section-tag">Propostas Comercial</div>
+          <div className="section-tag">{siteContent.packagesTag}</div>
           <h2 className="section-title">
-            Conheça nossos <span className="navy-accent">Pacotes & Serviços</span>
+            {siteContent.packagesLead} <span className="navy-accent">{siteContent.packagesAccent}</span>
           </h2>
         </div>
 
@@ -249,7 +235,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
           {/* Completa */}
           {proposals.completa && (
             <div className="package-card featured">
-              <div className="package-badge">Mais Escolhida</div>
+              <div className="package-badge">{siteContent.completeBadge}</div>
               <div>
                 <h3 className="package-title">{proposals.completa.title}</h3>
                 <p className="package-desc">{proposals.completa.description}</p>
@@ -268,7 +254,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
                 style={{ width: '100%', marginTop: '15px' }}
                 onClick={() => handleOpenProposalClientForm('completa')}
               >
-                <FileText size={16} /> Solicitar Proposta Completa (PDF)
+                <FileText size={16} /> {siteContent.completeButton}
               </button>
             </div>
           )}
@@ -294,7 +280,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
                 style={{ width: '100%', marginTop: '15px' }}
                 onClick={() => handleOpenProposalClientForm('cerimonial')}
               >
-                <FileText size={16} /> Solicitar Proposta Cerimonial (PDF)
+                <FileText size={16} /> {siteContent.ceremonyButton}
               </button>
             </div>
           )}
@@ -305,14 +291,14 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Bottom Floating Bar */}
       <div className="bottom-callout-bar">
         <div className="callout-info">
-          <img src={logo} alt="Logo" className="callout-avatar" />
+          <img src={brandLogo} alt={`Logo ${siteContent.brandName}`} className="callout-avatar" />
           <div className="callout-text">
-            <h4>Faça seu Orçamento!</h4>
-            <p>E nos permita transformar seus sonhos em realidade.</p>
+            <h4>{siteContent.calloutTitle}</h4>
+            <p>{siteContent.calloutText}</p>
           </div>
         </div>
         <button className="btn-gold" onClick={() => setModalOpen(true)}>
-          Conversar
+          {siteContent.calloutButton}
         </button>
       </div>
 
@@ -474,12 +460,12 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Footer */}
       <footer className="footer-clean">
         <p style={{ marginBottom: '4px' }}>
-          Camila's Cerimonial &copy; {new Date().getFullYear()} . Todos os direitos reservados.
+          {siteContent.brandName} &copy; {new Date().getFullYear()} . {siteContent.footerText}
         </p>
         <p>
           Desenvolvido por{' '}
-          <span onClick={() => window.open('https://www.instagram.com/eu.gabrielvieira/', '_blank')}>
-            Gabriel.
+          <span onClick={() => window.open(siteContent.developerUrl, '_blank')}>
+            {siteContent.developerName}
           </span>
         </p>
       </footer>

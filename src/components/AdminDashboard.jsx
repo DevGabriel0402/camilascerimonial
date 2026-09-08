@@ -10,8 +10,10 @@ import {
 } from 'lucide-react';
 import ProposalPdfGenerator from './ProposalPdfGenerator';
 import AdminLayout from './admin/AdminLayout';
+import LandingPageEditor from './admin/LandingPageEditor';
+import { defaultSiteContent } from '../siteContent';
 
-export default function AdminDashboard({ proposals, setProposals, onLogout }) {
+export default function AdminDashboard({ proposals, setProposals, siteContent = defaultSiteContent, setSiteContent = () => {}, onLogout }) {
   const [activeTab, setActiveTab] = useState('completa');
   const [currentProposal, setCurrentProposal] = useState(proposals.completa || defaultProposals.completa);
   const [pdfPreviewProposal, setPdfPreviewProposal] = useState(null);
@@ -314,6 +316,20 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
     setTimeout(() => setSuccessMsg(''), 4000);
   };
 
+  const handleSiteContentChange = async (updatedContent, save = false) => {
+    setSiteContent(updatedContent);
+    localStorage.setItem('camilas_site_content_v1', JSON.stringify(updatedContent));
+    if (!save) return;
+    setSuccessMsg('Página pública salva com sucesso!');
+    try {
+      await setDoc(doc(db, 'settings', 'landingPage'), updatedContent);
+      setSuccessMsg('Página pública salva e sincronizada!');
+    } catch (err) {
+      console.log('Sincronização da landing page:', err.message);
+    }
+    setTimeout(() => setSuccessMsg(''), 4000);
+  };
+
   return (
     <AdminLayout activeTab={activeTab} onNavigate={setActiveTab} onLogout={onLogout} onPreview={() => setPdfPreviewProposal(currentProposal)}>
 
@@ -326,7 +342,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
       )}
 
       <div>
-        {activeTab !== 'senha' && <>
+        {activeTab !== 'senha' && activeTab !== 'landing' && <>
           <div className="workspace-summary">
             <div className="workspace-summary-card"><div className="workspace-summary-icon"><CheckSquare size={19} /></div><div><span>Serviços inclusos</span><strong>{(currentProposal.categorizedItems || []).reduce((count, category) => count + (category.subitems || []).filter(item => item.selected !== false).length, 0)}</strong></div></div>
             <div className="workspace-summary-card"><div className="workspace-summary-icon"><Users size={19} /></div><div><span>Faixas de convidados</span><strong>{currentProposal.pricingByGuests?.tiers?.length || 0}</strong></div></div>
@@ -342,8 +358,12 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
           </div>
         )}
 
+        {activeTab === 'landing' && (
+          <LandingPageEditor content={siteContent} onChange={handleSiteContentChange} />
+        )}
+
         {/* ACCORDIONS FORM */}
-        {activeTab !== 'senha' && currentProposal && (
+        {activeTab !== 'senha' && activeTab !== 'landing' && currentProposal && (
           <form id="admin-proposal-form" onSubmit={handleSaveProposal} className="form-clean">
 
             {/* ACCORDION 1: Dados Principais */}

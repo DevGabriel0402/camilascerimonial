@@ -19,8 +19,9 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
       .replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
 
     const opt = {
-      // A4 minus 15 mm on each side leaves a 180 x 267 mm content area.
-      margin: [15, 15, 15, 15],
+      // The document reaches every edge of A4. White content has its own
+      // internal spacing, while the navy header and footer remain full width.
+      margin: 0,
       filename: `Proposta_CamilasCerimonial_${clientSlug}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
@@ -128,7 +129,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             ref={docRef}
             style={{
               background: '#FFFFFF',
-              width: '180mm',
+              width: '210mm',
               boxSizing: 'border-box',
               overflowWrap: 'anywhere',
               margin: '0 auto',
@@ -142,7 +143,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             {/* ── COVER HEADER ── */}
             <div className="pdf-keep-together" style={{
               background: 'linear-gradient(135deg, #1E3562 0%, #0f1f3d 60%, #162d56 100%)',
-              padding: '26px 20px 22px',
+              padding: '26px 15mm 22px',
               position: 'relative',
               overflow: 'hidden',
             }}>
@@ -202,7 +203,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             <div style={{ height: '4px', background: 'linear-gradient(90deg, #C5A467, #DFC08A, #C5A467)' }} />
 
             {/* ── BODY CONTENT ── */}
-            <div style={{ padding: '24px 0' }}>
+            <div style={{ padding: '24px 15mm' }}>
 
               {/* 1. DADOS DO CLIENTE */}
               {(proposal.clientName || proposal.clientCpfCnpj || proposal.clientPhone || proposal.eventDate) && (
@@ -463,7 +464,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             {/* ── FOOTER ── */}
             <div className="pdf-keep-together" style={{
               background: '#1E3562',
-              padding: '16px 20px',
+              padding: '16px 15mm',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               flexWrap: 'wrap', gap: '8px',
             }}>

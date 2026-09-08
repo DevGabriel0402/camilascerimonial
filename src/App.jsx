@@ -8,6 +8,7 @@ import LandingPage from './components/LandingPage';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import ProposalPdfGenerator from './components/ProposalPdfGenerator';
+import { defaultSiteContent } from './siteContent';
 
 export const defaultProposals = {
   completa: {
@@ -122,6 +123,10 @@ export default function App() {
     return localData ? JSON.parse(localData) : defaultProposals;
   });
   const [selectedPdfProposal, setSelectedPdfProposal] = useState(null);
+  const [siteContent, setSiteContent] = useState(() => {
+    const localData = localStorage.getItem('camilas_site_content_v1');
+    return localData ? { ...defaultSiteContent, ...JSON.parse(localData) } : defaultSiteContent;
+  });
 
   // Listen to Firebase Auth state
   useEffect(() => {
@@ -137,6 +142,7 @@ export default function App() {
       try {
         const completaDoc = await getDoc(doc(db, "proposals", "completa"));
         const cerimonialDoc = await getDoc(doc(db, "proposals", "cerimonial"));
+        const siteContentDoc = await getDoc(doc(db, 'settings', 'landingPage'));
 
         let updated = { ...proposals };
         if (completaDoc.exists()) {
@@ -148,6 +154,11 @@ export default function App() {
 
         setProposals(updated);
         localStorage.setItem('camilas_proposals_v3', JSON.stringify(updated));
+        if (siteContentDoc.exists()) {
+          const content = { ...defaultSiteContent, ...siteContentDoc.data() };
+          setSiteContent(content);
+          localStorage.setItem('camilas_site_content_v1', JSON.stringify(content));
+        }
       } catch (err) {
         console.warn('Usando propostas locais:', err);
       }
@@ -194,6 +205,7 @@ export default function App() {
           element={
             <LandingPage
               proposals={proposals}
+              siteContent={siteContent}
               onSelectProposalForPdf={handleSelectProposalForPdf}
             />
           }
@@ -206,6 +218,8 @@ export default function App() {
               <AdminDashboard
                 proposals={proposals}
                 setProposals={setProposals}
+                siteContent={siteContent}
+                setSiteContent={setSiteContent}
                 onLogout={handleLogout}
               />
             ) : (
