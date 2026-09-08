@@ -65,7 +65,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
     }
 
     const baseProposal = proposals[proposalModalType] || {};
-    
+
     const tiers = baseProposal.pricingByGuests?.tiers || [];
     const selectedTier = tiers.find(tier => tier.id === clientData.guestTierId);
     if (tiers.length > 0 && !selectedTier) {
@@ -120,7 +120,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
-      
+
       {/* Floating WhatsApp */}
       <a
         className="whatsapp-float"
@@ -143,7 +143,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
           <button className="btn-gold" onClick={() => setModalOpen(true)}>
             Solicitar Orçamento
           </button>
-          
+
           <Link to="/admin" className="admin-icon-btn" title="Área do Administrador">
             <Lock size={18} />
           </Link>
@@ -234,7 +234,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
         </div>
 
         <div className="packages-grid">
-          
+
           {/* Completa */}
           {proposals.completa && (
             <div className="package-card featured">
@@ -242,7 +242,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
               <div>
                 <h3 className="package-title">{proposals.completa.title}</h3>
                 <p className="package-desc">{proposals.completa.description}</p>
-                
+
                 <ul className="package-checklist">
                   {proposals.completa.items && proposals.completa.items.map((item, i) => (
                     <li key={i}>
@@ -268,7 +268,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
               <div>
                 <h3 className="package-title">{proposals.cerimonial.title}</h3>
                 <p className="package-desc">{proposals.cerimonial.description}</p>
-                
+
                 <ul className="package-checklist">
                   {proposals.cerimonial.items && proposals.cerimonial.items.map((item, i) => (
                     <li key={i}>
@@ -380,7 +380,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
                   >
                     <option value="">Selecione uma opção</option>
                     {proposals[proposalModalType].pricingByGuests.tiers.map(tier => (
-                      <option key={tier.id} value={tier.id}>{tier.range} - {tier.price || 'Sob consulta'}</option>
+                      <option key={tier.id} value={tier.id}>{tier.range}</option>
                     ))}
                   </select>
                   {clientData.guestTierId && (
