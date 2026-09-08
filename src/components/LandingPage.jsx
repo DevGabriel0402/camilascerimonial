@@ -98,6 +98,7 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
       clientEmail: clientData.email,
       clientCpfCnpj: clientData.cpf,
       eventDate: 'A definir',
+      eventType: proposalModalType === 'completa' ? 'Assessoria e Cerimonial Completo' : 'Cerimonial',
       guestCount: selectedTier?.range || '',
       price: selectedTier ? (selectedTier.price || 'Sob consulta') : baseProposal.price,
       pricingByGuests: {
@@ -381,11 +382,6 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
                       <option key={tier.id} value={tier.id}>{tier.range}</option>
                     ))}
                   </select>
-                  {clientData.guestTierId && (
-                    <p role="status" style={{ color: 'var(--secondary-navy)', fontWeight: 'bold', marginTop: '10px' }}>
-                      Valor da proposta: {proposals[proposalModalType].pricingByGuests.tiers.find(tier => tier.id === clientData.guestTierId)?.price || 'Sob consulta'}
-                    </p>
-                  )}
                 </div>
               )}
 

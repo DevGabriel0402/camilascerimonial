@@ -218,7 +218,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                     {proposal.clientPhone && <InfoRow label="WhatsApp" value={proposal.clientPhone} />}
                     {proposal.clientEmail && <InfoRow label="E-mail" value={proposal.clientEmail} />}
                     {proposal.eventDate && <InfoRow label="Data do Evento" value={proposal.eventDate} />}
-                    {proposal.eventType && <InfoRow label="Tipo de Evento" value={proposal.eventType} />}
+                    {proposal.eventType && <InfoRow label="Tipo de Serviço" value={proposal.eventType} />}
                     {proposal.guestCount && <InfoRow label="Estimativa de Convidados" value={proposal.guestCount} />}
                   </div>
                 </div>
