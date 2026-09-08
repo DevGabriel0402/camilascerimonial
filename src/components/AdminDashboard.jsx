@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { defaultProposals } from '../App';
 import { maskCurrency } from '../utils/masks';
 import {
-  Save, LogOut, FileText, Plus, Trash2, Eye, Key, CheckCircle2, Home, Database,
+  Save, Plus, Trash2, Eye, CheckCircle2,
   ChevronDown, ChevronUp, UserCheck, HeartHandshake, CheckSquare, Square, Users,
-  CreditCard, QrCode, Landmark, MessageSquare, ShieldCheck, Sparkles
+  CreditCard, QrCode, Landmark, MessageSquare
 } from 'lucide-react';
 import ProposalPdfGenerator from './ProposalPdfGenerator';
+import AdminLayout from './admin/AdminLayout';
 
 export default function AdminDashboard({ proposals, setProposals, onLogout }) {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('completa');
   const [currentProposal, setCurrentProposal] = useState(proposals.completa || defaultProposals.completa);
   const [pdfPreviewProposal, setPdfPreviewProposal] = useState(null);
@@ -316,7 +315,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
   };
 
   return (
-    <div className="admin-shell">
+    <AdminLayout activeTab={activeTab} onNavigate={setActiveTab} onLogout={onLogout} onPreview={() => setPdfPreviewProposal(currentProposal)}>
 
       {/* PDF Modal Viewer */}
       {pdfPreviewProposal && (
@@ -326,59 +325,15 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
         />
       )}
 
-      <div className="admin-wrapper">
-
-        {/* Top Control Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <ShieldCheck color="var(--secondary-navy)" size={26} />
-              <h1 className="serif-title" style={{ fontSize: '24px', color: 'var(--secondary-navy)' }}>
-                Edição de Propostas Comercial
-              </h1>
-            </div>
-            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Edite cada seção da proposta diretamente por aqui com salvamento automático.
-            </p>
+      <div>
+        {activeTab !== 'senha' && <>
+          <div className="workspace-summary">
+            <div className="workspace-summary-card"><div className="workspace-summary-icon"><CheckSquare size={19} /></div><div><span>Serviços inclusos</span><strong>{(currentProposal.categorizedItems || []).reduce((count, category) => count + (category.subitems || []).filter(item => item.selected !== false).length, 0)}</strong></div></div>
+            <div className="workspace-summary-card"><div className="workspace-summary-icon"><Users size={19} /></div><div><span>Faixas de convidados</span><strong>{currentProposal.pricingByGuests?.tiers?.length || 0}</strong></div></div>
+            <div className="workspace-summary-card"><div className="workspace-summary-icon"><CreditCard size={19} /></div><div><span>Formas de pagamento</span><strong>{(currentProposal.paymentOptions?.methods || []).filter(method => method.enabled !== false).length}</strong></div></div>
           </div>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <Link to="/" className="btn-outline-gold" style={{ textDecoration: 'none' }}>
-              <Home size={15} /> Ver Site
-            </Link>
-            <button className="btn-outline-gold" onClick={onLogout} style={{ color: '#ef4444', borderColor: '#fee2e2' }}>
-              <LogOut size={15} /> Sair
-            </button>
-          </div>
-        </div>
-
-        {/* Status Bar */}
-        <div className="admin-stats-grid">
-          <div className="admin-stat-card">
-            <div className="admin-stat-icon">
-              <Database size={20} />
-            </div>
-            <div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Banco de Dados</div>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
-                Conectado & Sincronizado
-              </div>
-            </div>
-          </div>
-
-          <div className="admin-stat-card">
-            <div className="admin-stat-icon">
-              <Sparkles size={20} color="var(--primary-gold)" />
-            </div>
-            <div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Modo de Edição</div>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--secondary-navy)' }}>
-                Direto pelo Painel
-              </div>
-            </div>
-          </div>
-        </div>
+          <div className="workspace-editor-label"><h2>Conteúdo da proposta</h2><p>Edite as seções e salve suas alterações.</p></div>
+        </>}
 
         {/* Success Alert */}
         {successMsg && (
@@ -387,43 +342,16 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
           </div>
         )}
 
-        {/* Tabs Navigation */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', flexWrap: 'wrap' }}>
-          <button
-            className={activeTab === 'completa' ? 'btn-gold' : 'btn-outline-gold'}
-            onClick={() => setActiveTab('completa')}
-          >
-            Proposta Completa
-          </button>
-          <button
-            className={activeTab === 'cerimonial' ? 'btn-gold' : 'btn-outline-gold'}
-            onClick={() => setActiveTab('cerimonial')}
-          >
-            Proposta Cerimonial
-          </button>
-          <button
-            className={activeTab === 'nova' ? 'btn-gold' : 'btn-outline-gold'}
-            onClick={() => setActiveTab('nova')}
-          >
-            <Plus size={15} /> Criar PDF Personalizado
-          </button>
-          <button
-            className={activeTab === 'senha' ? 'btn-gold' : 'btn-outline-gold'}
-            onClick={() => setActiveTab('senha')}
-            style={{ marginLeft: 'auto' }}
-          >
-            <Key size={15} /> Senha Admin
-          </button>
-        </div>
-
         {/* ACCORDIONS FORM */}
         {activeTab !== 'senha' && currentProposal && (
-          <form onSubmit={handleSaveProposal} className="form-clean">
+          <form id="admin-proposal-form" onSubmit={handleSaveProposal} className="form-clean">
 
             {/* ACCORDION 1: Dados Principais */}
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '15px', overflow: 'hidden' }}>
               <div
                 onClick={() => toggleAccordion('dados')}
+                role="button" tabIndex={0} aria-expanded={openAccordions.dados}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleAccordion('dados'); } }}
                 style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: '#ffffff', borderBottom: openAccordions.dados ? '1px solid var(--border-color)' : 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -447,7 +375,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                  <div className="admin-responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
 
                     <div>
                       <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>Tipo de Evento</label>
@@ -467,6 +395,8 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '15px', overflow: 'hidden' }}>
               <div
                 onClick={() => toggleAccordion('sobre')}
+                role="button" tabIndex={0} aria-expanded={openAccordions.sobre}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleAccordion('sobre'); } }}
                 style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: '#ffffff', borderBottom: openAccordions.sobre ? '1px solid var(--border-color)' : 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -496,6 +426,8 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '15px', overflow: 'hidden' }}>
               <div
                 onClick={() => toggleAccordion('itens')}
+                role="button" tabIndex={0} aria-expanded={openAccordions.itens}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleAccordion('itens'); } }}
                 style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: '#ffffff', borderBottom: openAccordions.itens ? '1px solid var(--border-color)' : 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -584,6 +516,8 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '15px', overflow: 'hidden' }}>
               <div
                 onClick={() => toggleAccordion('orcamento')}
+                role="button" tabIndex={0} aria-expanded={openAccordions.orcamento}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleAccordion('orcamento'); } }}
                 style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: '#ffffff', borderBottom: openAccordions.orcamento ? '1px solid var(--border-color)' : 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -598,7 +532,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
               {openAccordions.orcamento && (
                 <div style={{ padding: '20px' }}>
                   <div style={{ marginBottom: '15px', background: '#ffffff', border: '1px solid var(--border-color)', padding: '15px', borderRadius: '10px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div className="admin-responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
 
                       <div>
                         <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>
@@ -683,6 +617,8 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '15px', overflow: 'hidden' }}>
               <div
                 onClick={() => toggleAccordion('pagamento')}
+                role="button" tabIndex={0} aria-expanded={openAccordions.pagamento}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleAccordion('pagamento'); } }}
                 style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: '#ffffff', borderBottom: openAccordions.pagamento ? '1px solid var(--border-color)' : 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -744,6 +680,8 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '20px', overflow: 'hidden' }}>
               <div
                 onClick={() => toggleAccordion('saudacao')}
+                role="button" tabIndex={0} aria-expanded={openAccordions.saudacao}
+                onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleAccordion('saudacao'); } }}
                 style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', background: '#ffffff', borderBottom: openAccordions.saudacao ? '1px solid var(--border-color)' : 'none' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -783,7 +721,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
+            <div className="workspace-form-actions">
               <button
                 type="button"
                 className="btn-outline-gold"
@@ -830,6 +768,6 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
         )}
 
       </div>
-    </div>
+    </AdminLayout>
   );
 }

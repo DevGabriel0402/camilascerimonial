@@ -1,24 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap");
 
 :root {
-  --font-serif: 'Montserrat', sans-serif;
-  --font-sans: 'Montserrat', sans-serif;
+  --font-serif: "Montserrat", sans-serif;
+  --font-sans: "Montserrat", sans-serif;
 
-  --bg-page: #FAFAFA;
-  --bg-card: #FFFFFF;
-  --bg-subtle: #F4F1EA;
+  --bg-page: #fafafa;
+  --bg-card: #ffffff;
+  --bg-subtle: #f4f1ea;
 
-  --primary-gold: #C5A467;
-  --primary-gold-light: #F3EBDD;
-  --secondary-navy: #1E3562;
-  --secondary-navy-light: #2A4780;
+  --primary-gold: #c5a467;
+  --primary-gold-light: #f3ebdd;
+  --secondary-navy: #1e3562;
+  --secondary-navy-light: #2a4780;
 
-  --text-dark: #1E293B;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
 
-  --border-color: #E2E8F0;
-  --border-soft: #F1F5F9;
+  --border-color: #e2e8f0;
+  --border-soft: #f1f5f9;
 
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
   --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -28,7 +28,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 body {
@@ -121,7 +121,6 @@ body {
 
 .brand-logo-img {
   width: 40px;
-
 }
 
 .brand-name {
@@ -150,7 +149,7 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #25D366;
+  background: #25d366;
   color: white;
   display: flex;
   align-items: center;
@@ -707,6 +706,7 @@ body {
 
   .brand-name {
     font-size: 16px;
+    display: none;
   }
 
   .brand-sub {
