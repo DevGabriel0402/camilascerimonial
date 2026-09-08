@@ -1,20 +1,26 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Download, X, FileCheck } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
+import logo from '../logo.png';
 
 export default function ProposalPdfGenerator({ proposal, onClose }) {
   const docRef = useRef(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     const element = docRef.current;
-    if (!element) return;
+    if (!element || downloading) return;
+    setDownloading(true);
+    setDownloadError('');
 
     const clientSlug = (proposal.clientName || proposal.title || 'proposta')
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
 
     const opt = {
-      margin: 0,
+      // A4 minus 15 mm on each side leaves a 180 x 267 mm content area.
+      margin: [15, 15, 15, 15],
       filename: `Proposta_CamilasCerimonial_${clientSlug}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
@@ -22,15 +28,17 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
         useCORS: true,
         logging: false,
         letterRendering: true,
-        allowTaint: true,
+        backgroundColor: '#ffffff',
+        windowWidth: 1024,
+        scrollX: 0,
         scrollY: 0,
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: {
-        mode: ['avoid-all', 'css', 'legacy'],
+        mode: ['css', 'legacy'],
         before: '.pdf-page-break-before',
         avoid: [
-          '.pdf-section',
+          '.pdf-keep-together',
           '.pdf-item-row',
           '.pdf-payment-card',
           '.pdf-tier-row',
@@ -40,7 +48,16 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
       },
     };
 
-    html2pdf().set(opt).from(element).save();
+    try {
+      await document.fonts.ready;
+      await Promise.all(Array.from(element.querySelectorAll('img'), image => image.decode()));
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      setDownloadError('Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (!proposal) return null;
@@ -79,6 +96,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={handleDownloadPdf}
+              disabled={downloading}
               style={{
                 background: '#C5A467', color: '#fff', border: 'none', borderRadius: '8px',
                 padding: '8px 18px', fontSize: '13px', fontWeight: '700',
@@ -86,7 +104,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                 letterSpacing: '0.3px',
               }}
             >
-              <Download size={15} /> Baixar PDF
+              <Download size={15} /> {downloading ? 'Gerando PDF...' : 'Baixar PDF'}
             </button>
             <button
               onClick={onClose}
@@ -101,6 +119,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
           </div>
         </div>
 
+        {downloadError && <p role="alert" style={{ padding: '0 22px', color: '#b91c1c' }}>{downloadError}</p>}
         {/* ── Scrollable Preview Area ── */}
         <div style={{ overflowY: 'auto', flex: 1, padding: '20px', background: '#CBD5E1' }}>
 
@@ -109,10 +128,10 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             ref={docRef}
             style={{
               background: '#FFFFFF',
-              width: '210mm',
-              minHeight: '297mm',
+              width: '180mm',
+              boxSizing: 'border-box',
+              overflowWrap: 'anywhere',
               margin: '0 auto',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
               fontFamily: "'Georgia', 'Times New Roman', serif",
               color: '#1a1a2e',
               fontSize: '12px',
@@ -121,9 +140,9 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
           >
 
             {/* ── COVER HEADER ── */}
-            <div style={{
+            <div className="pdf-keep-together" style={{
               background: 'linear-gradient(135deg, #1E3562 0%, #0f1f3d 60%, #162d56 100%)',
-              padding: '36px 42px 28px 42px',
+              padding: '26px 20px 22px',
               position: 'relative',
               overflow: 'hidden',
             }}>
@@ -143,7 +162,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
                     <img
-                      src="/src/logo.png"
+                      src={logo}
                       alt="Logo"
                       style={{ width: '58px', height: '58px', objectFit: 'scale-down', borderRadius: '50%', border: '2px solid rgba(197,164,103,0.5)', background: 'rgba(250, 250, 250, 0.98)', padding: '4px' }}
                       crossOrigin="anonymous"
@@ -183,14 +202,14 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             <div style={{ height: '4px', background: 'linear-gradient(90deg, #C5A467, #DFC08A, #C5A467)' }} />
 
             {/* ── BODY CONTENT ── */}
-            <div style={{ padding: '32px 42px' }}>
+            <div style={{ padding: '24px 0' }}>
 
               {/* 1. DADOS DO CLIENTE */}
               {(proposal.clientName || proposal.clientCpfCnpj || proposal.clientPhone || proposal.eventDate) && (
-                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                <div className="pdf-section" style={{ marginBottom: '28px' }}>
                   <SectionTitle icon="👤" title="Dados do Cliente" />
                   <div style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr',
+                    display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
                     gap: '10px', marginTop: '12px',
                   }}>
                     {proposal.clientName && <InfoRow label="Cliente / Noivos" value={proposal.clientName} />}
@@ -208,7 +227,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
 
               {/* 2. SOBRE NÓS */}
               {proposal.aboutUs && (
-                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                <div className="pdf-section" style={{ marginBottom: '28px' }}>
                   <SectionTitle icon="✨" title="Sobre Camila's Cerimonial" />
                   <div style={{
                     marginTop: '12px', background: '#F9F6F0',
@@ -226,7 +245,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
 
               {/* 3. SERVIÇOS INCLUSOS */}
               {proposal.categorizedItems && proposal.categorizedItems.length > 0 && (
-                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                <div className="pdf-section" style={{ marginBottom: '28px' }}>
                   <SectionTitle icon="📋" title="Serviços &amp; Itens Inclusos" />
                   <div style={{ marginTop: '14px' }}>
                     {proposal.categorizedItems.map((catGroup) => {
@@ -235,7 +254,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                       return (
                         <div
                           key={catGroup.id}
-                          className="pdf-section"
+                          className="pdf-keep-together"
                           style={{ pageBreakInside: 'avoid', marginBottom: '18px' }}
                         >
                           <div style={{
@@ -276,7 +295,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
               <Divider />
 
               {/* 4. INVESTIMENTO */}
-              <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+              <div className="pdf-section" style={{ marginBottom: '28px' }}>
                 <SectionTitle icon="💰" title="Investimento" />
                 <div style={{ marginTop: '14px' }}>
                   {guestTiers.length > 0 ? (
@@ -350,11 +369,11 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
 
               {/* 5. FORMAS DE PAGAMENTO */}
               {enabledMethods.length > 0 && (
-                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                <div className="pdf-section" style={{ marginBottom: '28px' }}>
                   <SectionTitle icon="💳" title="Formas de Pagamento" />
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: `repeat(${Math.min(enabledMethods.length, 3)}, 1fr)`,
+                    gridTemplateColumns: `repeat(${Math.min(enabledMethods.length, 3)}, minmax(0, 1fr))`,
                     gap: '10px', marginTop: '14px',
                   }}>
                     {enabledMethods.map((method) => (
@@ -399,7 +418,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
               <Divider />
 
               {/* 6. SAUDAÇÃO FINAL */}
-              <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '32px' }}>
+              <div className="pdf-section" style={{ marginBottom: '32px' }}>
                 {proposal.finalGreeting?.message && (
                   <div style={{
                     background: '#F9F6F0', border: '1px solid #E8DCC8',
@@ -413,7 +432,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                 )}
 
                 {/* Assinaturas */}
-                <div style={{
+                <div className="pdf-keep-together" style={{
                   display: 'grid', gridTemplateColumns: '1fr 1fr',
                   gap: '30px', marginTop: '24px', paddingTop: '16px',
                   borderTop: '1px dashed #CBD5E1',
@@ -442,9 +461,9 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
             </div>
 
             {/* ── FOOTER ── */}
-            <div style={{
+            <div className="pdf-keep-together" style={{
               background: '#1E3562',
-              padding: '16px 42px',
+              padding: '16px 20px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               flexWrap: 'wrap', gap: '8px',
             }}>
@@ -492,7 +511,7 @@ function SectionTitle({ icon, title }) {
 
 function InfoRow({ label, value }) {
   return (
-    <div style={{
+    <div className="pdf-keep-together" style={{
       background: '#F9F6F0', border: '1px solid #E8DCC8',
       borderRadius: '6px', padding: '8px 12px',
     }}>
