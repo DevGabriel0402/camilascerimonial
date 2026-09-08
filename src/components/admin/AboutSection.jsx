@@ -1,4 +1,5 @@
 import React from 'react';
+import toast from 'react-hot-toast';
 
 const inputStyle = {
   width: '100%', padding: '9px 12px',
@@ -24,7 +25,7 @@ export default function AboutSection({ proposal, onChange }) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 400 * 1024) {
-      alert('Logo muito grande. Use uma imagem abaixo de 400KB.');
+      toast.error('Logo muito grande. Use uma imagem abaixo de 400 KB.');
       return;
     }
     const reader = new FileReader();

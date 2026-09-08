@@ -20,6 +20,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { Download, MessageCircle, Lock, FileText, CheckCircle2, Star, X, ChevronRight, FileCheck } from 'lucide-react';
 import { maskPhone, maskCPF } from '../utils/masks';
+import toast from 'react-hot-toast';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -55,7 +56,7 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
   const handleSendWhatsApp = (e) => {
     e.preventDefault();
     if (!formName || eventType === 'nenhum') {
-      alert('Por favor, informe seu nome e o tipo do evento!');
+      toast.error('Informe seu nome e o tipo do evento.');
       return;
     }
 
@@ -76,7 +77,7 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
   const handleGenerateCustomPdf = (e) => {
     e.preventDefault();
     if (!clientData.name || !clientData.phone || !clientData.cpf) {
-      alert('Por favor, informe seu Nome, WhatsApp e CPF para personalizar o PDF!');
+      toast.error('Informe seu nome, WhatsApp e CPF para personalizar o PDF.');
       return;
     }
 
@@ -85,7 +86,7 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
     const tiers = baseProposal.pricingByGuests?.tiers || [];
     const selectedTier = tiers.find(tier => tier.id === clientData.guestTierId);
     if (tiers.length > 0 && !selectedTier) {
-      alert('Selecione uma opção de convidados.');
+      toast.error('Selecione uma opção de convidados.');
       return;
     }
 

@@ -9,6 +9,7 @@ import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import ProposalPdfGenerator from './components/ProposalPdfGenerator';
 import { defaultSiteContent } from './siteContent';
+import { Toaster } from 'react-hot-toast';
 
 export const defaultProposals = {
   completa: {
@@ -191,6 +192,15 @@ export default function App() {
 
   return (
     <div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: { background: '#ffffff', color: '#1e3562', border: '1px solid #e6e9ef', borderRadius: '12px', boxShadow: '0 12px 28px rgba(30,53,98,0.15)', fontWeight: 600 },
+          success: { iconTheme: { primary: '#18a870', secondary: '#ffffff' } },
+          error: { iconTheme: { primary: '#d9534f', secondary: '#ffffff' } },
+        }}
+      />
       {/* Modal viewer for proposal PDF */}
       {selectedPdfProposal && (
         <ProposalPdfGenerator

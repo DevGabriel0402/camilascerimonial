@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { defaultProposals } from '../App';
 import { maskCurrency } from '../utils/masks';
 import {
-  Save, Plus, Trash2, Eye, CheckCircle2,
+  Save, Plus, Trash2, Eye,
   ChevronDown, ChevronUp, UserCheck, HeartHandshake, CheckSquare, Square, Users,
   CreditCard, QrCode, Landmark, MessageSquare
 } from 'lucide-react';
@@ -12,12 +12,12 @@ import ProposalPdfGenerator from './ProposalPdfGenerator';
 import AdminLayout from './admin/AdminLayout';
 import LandingPageEditor from './admin/LandingPageEditor';
 import { defaultSiteContent } from '../siteContent';
+import toast from 'react-hot-toast';
 
 export default function AdminDashboard({ proposals, setProposals, siteContent = defaultSiteContent, setSiteContent = () => {}, onLogout }) {
   const [activeTab, setActiveTab] = useState('completa');
   const [currentProposal, setCurrentProposal] = useState(proposals.completa || defaultProposals.completa);
   const [pdfPreviewProposal, setPdfPreviewProposal] = useState(null);
-  const [successMsg, setSuccessMsg] = useState('');
 
   // Accordions Open/Close state
   const [openAccordions, setOpenAccordions] = useState({
@@ -289,45 +289,43 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
 
     setProposals(updatedProposals);
     localStorage.setItem('camilas_proposals_v3', JSON.stringify(updatedProposals));
-    setSuccessMsg('Proposta salva e atualizada com sucesso!');
+    const toastId = toast.loading('Salvando proposta...');
 
     // 2. Tenta sincronizar no Firebase Firestore em segundo plano
     try {
       await setDoc(doc(db, "proposals", activeTab), currentProposal);
-      setSuccessMsg('Proposta salva e sincronizada no Firebase Firestore!');
+      toast.success('Proposta salva e sincronizada!', { id: toastId });
     } catch (err) {
       console.log('Sincronização em segundo plano:', err.message);
+      toast.success('Proposta salva neste dispositivo.', { id: toastId });
     }
-
-    setTimeout(() => setSuccessMsg(''), 4000);
   };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
     if (!newPassword) return;
     if (newPassword !== confirmPassword) {
-      alert('As senhas não coincidem!');
+      toast.error('As senhas não coincidem.');
       return;
     }
     localStorage.setItem('adminPassword', newPassword);
-    setSuccessMsg('Senha alterada com sucesso!');
+    toast.success('Senha alterada com sucesso!');
     setNewPassword('');
     setConfirmPassword('');
-    setTimeout(() => setSuccessMsg(''), 4000);
   };
 
   const handleSiteContentChange = async (updatedContent, save = false) => {
     setSiteContent(updatedContent);
     localStorage.setItem('camilas_site_content_v1', JSON.stringify(updatedContent));
     if (!save) return;
-    setSuccessMsg('Página pública salva com sucesso!');
+    const toastId = toast.loading('Salvando página pública...');
     try {
       await setDoc(doc(db, 'settings', 'landingPage'), updatedContent);
-      setSuccessMsg('Página pública salva e sincronizada!');
+      toast.success('Página pública salva e sincronizada!', { id: toastId });
     } catch (err) {
       console.log('Sincronização da landing page:', err.message);
+      toast.success('Página pública salva neste dispositivo.', { id: toastId });
     }
-    setTimeout(() => setSuccessMsg(''), 4000);
   };
 
   return (
@@ -350,13 +348,6 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
           </div>
           <div className="workspace-editor-label"><h2>Conteúdo da proposta</h2><p>Edite as seções e salve suas alterações.</p></div>
         </>}
-
-        {/* Success Alert */}
-        {successMsg && (
-          <div style={{ background: '#dcfce7', border: '1px solid #86efac', color: '#15803d', padding: '12px 18px', borderRadius: '10px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '600', fontSize: '14px' }}>
-            <CheckCircle2 size={18} /> {successMsg}
-          </div>
-        )}
 
         {activeTab === 'landing' && (
           <LandingPageEditor content={siteContent} onChange={handleSiteContentChange} />
