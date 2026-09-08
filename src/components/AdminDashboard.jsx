@@ -15,6 +15,7 @@ import AdminLayout from './admin/AdminLayout';
 import LandingPageEditor from './admin/LandingPageEditor';
 import { defaultSiteContent } from '../siteContent';
 import toast from 'react-hot-toast';
+import PasswordInput from './PasswordInput';
 
 export default function AdminDashboard({ proposals, setProposals, siteContent = defaultSiteContent, setSiteContent = () => {}, onLogout }) {
   const [activeTab, setActiveTab] = useState('completa');
@@ -780,19 +781,19 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
               Alterar Senha do Firebase
             </h3>
 
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Nova senha do Firebase..."
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
               required
             />
 
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Confirme a nova senha..."
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
               required
             />
 

@@ -800,6 +800,64 @@ body {
   }
 }
 
+/* Password field with a custom checkbox visibility control */
+.password-input-control {
+  position: relative;
+}
+
+.password-input-control > input {
+  padding-right: 52px;
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 40%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 8px;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.password-visibility-toggle:hover {
+  color: var(--secondary-navy);
+  background: var(--primary-gold-light);
+}
+
+.password-visibility-toggle > input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.password-visibility-toggle:has(input:focus-visible) {
+  outline: 2px solid var(--primary-gold);
+  outline-offset: 2px;
+}
+
+.password-visibility-icon {
+  display: grid;
+  place-items: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Extra Small Mobile (under 380px) */
 @media (max-width: 380px) {
   .hero-title {

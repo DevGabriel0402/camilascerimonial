@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ArrowLeft, KeyRound, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
+import PasswordInput from './PasswordInput';
 
 export default function AdminLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -83,11 +84,11 @@ export default function AdminLogin({ onLoginSuccess }) {
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>Senha</label>
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Digite sua senha..."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
           </div>
