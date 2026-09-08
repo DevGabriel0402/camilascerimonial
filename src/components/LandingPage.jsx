@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { maskPhone, maskCPF } from "../utils/masks";
 import toast from "react-hot-toast";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../firebase";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -84,7 +86,7 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
   };
 
   // Submit Client Data Form and Generate Custom PDF
-  const handleGenerateCustomPdf = (e) => {
+  const handleGenerateCustomPdf = async (e) => {
     e.preventDefault();
     if (!clientData.name || !clientData.phone || !clientData.cpf) {
       toast.error("Informe seu nome, WhatsApp e CPF para personalizar o PDF.");
@@ -123,6 +125,23 @@ export default function LandingPage({ proposals, siteContent, onSelectProposalFo
         tiers: tiers.map((tier) => ({ ...tier, selected: tier.id === selectedTier?.id })),
       },
     };
+
+    try {
+      await addDoc(collection(db, "pdfRequests"), {
+        clientName: clientData.name,
+        clientPhone: clientData.phone,
+        clientEmail: clientData.email || "",
+        clientCpf: clientData.cpf,
+        proposalType: proposalModalType,
+        proposalTitle: baseProposal.title || "",
+        serviceType: customProposalForPdf.eventType,
+        guestRange: selectedTier?.range || "",
+        createdAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Erro ao registrar solicitações de PDF:", error);
+      toast.error("O PDF foi gerado, mas não foi possível registrar a solicitação.");
+    }
 
     setProposalModalType(null);
     onSelectProposalForPdf(customProposalForPdf);

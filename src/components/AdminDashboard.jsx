@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -16,11 +16,15 @@ import LandingPageEditor from './admin/LandingPageEditor';
 import { defaultSiteContent } from '../siteContent';
 import toast from 'react-hot-toast';
 import PasswordInput from './PasswordInput';
+import PdfRequests from './admin/PdfRequests';
 
 export default function AdminDashboard({ proposals, setProposals, siteContent = defaultSiteContent, setSiteContent = () => {}, onLogout }) {
   const [activeTab, setActiveTab] = useState('completa');
   const [currentProposal, setCurrentProposal] = useState(proposals.completa || defaultProposals.completa);
   const [pdfPreviewProposal, setPdfPreviewProposal] = useState(null);
+  const [pdfRequests, setPdfRequests] = useState([]);
+  const [pdfRequestsLoading, setPdfRequestsLoading] = useState(false);
+  const [pdfRequestsError, setPdfRequestsError] = useState('');
 
   // Accordions Open/Close state
   const [openAccordions, setOpenAccordions] = useState({
@@ -53,6 +57,28 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
       });
     }
   }, [activeTab, proposals]);
+
+  useEffect(() => {
+    if (activeTab !== 'solicitacoes') return undefined;
+
+    setPdfRequestsLoading(true);
+    setPdfRequestsError('');
+    return onSnapshot(
+      collection(db, 'pdfRequests'),
+      snapshot => {
+        const requests = snapshot.docs
+          .map(item => ({ id: item.id, ...item.data() }))
+          .sort((first, second) => (second.createdAt?.seconds || 0) - (first.createdAt?.seconds || 0));
+        setPdfRequests(requests);
+        setPdfRequestsLoading(false);
+      },
+      error => {
+        console.error('Erro ao carregar solicitações de PDF:', error);
+        setPdfRequestsError('Não foi possível carregar as solicitações de PDF.');
+        setPdfRequestsLoading(false);
+      }
+    );
+  }, [activeTab]);
 
   const toggleAccordion = (key) => {
     setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
@@ -365,7 +391,7 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
       )}
 
       <div>
-        {activeTab !== 'senha' && activeTab !== 'landing' && <>
+        {!['senha', 'landing', 'solicitacoes'].includes(activeTab) && <>
           <div className="workspace-summary">
             <div className="workspace-summary-card"><div className="workspace-summary-icon"><CheckSquare size={19} /></div><div><span>Serviços inclusos</span><strong>{(currentProposal.categorizedItems || []).reduce((count, category) => count + (category.subitems || []).filter(item => item.selected !== false).length, 0)}</strong></div></div>
             <div className="workspace-summary-card"><div className="workspace-summary-icon"><Users size={19} /></div><div><span>Faixas de convidados</span><strong>{currentProposal.pricingByGuests?.tiers?.length || 0}</strong></div></div>
@@ -378,8 +404,12 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
           <LandingPageEditor content={siteContent} onChange={handleSiteContentChange} />
         )}
 
+        {activeTab === 'solicitacoes' && (
+          <PdfRequests requests={pdfRequests} loading={pdfRequestsLoading} error={pdfRequestsError} />
+        )}
+
         {/* ACCORDIONS FORM */}
-        {activeTab !== 'senha' && activeTab !== 'landing' && currentProposal && (
+        {!['senha', 'landing', 'solicitacoes'].includes(activeTab) && currentProposal && (
           <form id="admin-proposal-form" onSubmit={handleSaveProposal} className="form-clean">
 
             {/* ACCORDION 1: Dados Principais */}

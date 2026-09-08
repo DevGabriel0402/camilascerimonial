@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, HeartHandshake, Plus, KeyRound, ExternalLink, LogOut, Menu, X, Eye, Save, ChevronRight, ShieldCheck, LayoutTemplate } from 'lucide-react';
+import { FileText, HeartHandshake, Plus, KeyRound, ExternalLink, LogOut, Menu, X, Eye, Save, ChevronRight, ShieldCheck, LayoutTemplate, ClipboardList } from 'lucide-react';
 import logo from '../../logo.png';
 import './AdminLayout.css';
 
@@ -8,6 +8,7 @@ const sections = [
   { id: 'completa', label: 'Proposta completa', description: 'Assessoria do início ao grande dia.', icon: FileText },
   { id: 'cerimonial', label: 'Cerimonial do dia', description: 'Cada detalhe da celebração, bem cuidado.', icon: HeartHandshake },
   { id: 'nova', label: 'PDF personalizado', description: 'Prepare uma proposta para uma ocasião especial.', icon: Plus },
+  { id: 'solicitacoes', label: 'Solicitações de PDF', description: 'Acompanhe os clientes que geraram uma proposta.', icon: ClipboardList },
   { id: 'landing', label: 'Site público', description: 'Personalize todos os textos, fotos e contatos da sua página.', icon: LayoutTemplate },
   { id: 'senha', label: 'Configurações', description: 'Gerencie as configurações da sua conta.', icon: KeyRound },
 ];
@@ -46,7 +47,7 @@ export default function AdminLayout({ activeTab, onNavigate, onLogout, onPreview
       <div className="workspace-switcher"><span className="workspace-avatar">CC</span><div><strong>Meu espaço de trabalho</strong><span>Camila’s Cerimonial</span></div></div>
       <nav aria-label={mobile ? 'Menu administrativo móvel' : 'Menu administrativo'}>
         <p className="workspace-nav-label">PROPOSTAS</p>
-        {sections.slice(0, 4).map(({ id, label, icon: Icon }) => (
+        {sections.slice(0, 5).map(({ id, label, icon: Icon }) => (
           <button type="button" key={id} className={`workspace-nav-item ${activeTab === id ? 'is-active' : ''}`} aria-current={activeTab === id ? 'page' : undefined} onClick={() => navigate(id)}>
             <Icon size={19} /><span>{label}</span>{activeTab === id && <ChevronRight size={15} />}
           </button>
@@ -73,12 +74,12 @@ export default function AdminLayout({ activeTab, onNavigate, onLogout, onPreview
         <header className="workspace-topbar">
           <div className="workspace-topbar-start"><button type="button" ref={menuRef} className="workspace-icon-button workspace-menu-button" aria-label="Abrir menu" aria-expanded={menuOpen} aria-controls="workspace-mobile-menu" onClick={() => setMenuOpen(true)}><Menu size={22} /></button><div className="workspace-breadcrumb"><span>Painel</span><ChevronRight size={14} /><strong>{selected.label}</strong></div></div>
           <div className="workspace-topbar-actions">
-            {activeTab !== 'senha' && <>{activeTab !== 'landing' && <button type="button" className="workspace-button workspace-button-secondary" aria-label="Visualizar PDF" onClick={onPreview}><Eye size={17} /><span>Visualizar PDF</span></button>}<button type="submit" form={activeTab === 'landing' ? 'admin-site-form' : 'admin-proposal-form'} className="workspace-button workspace-button-primary" aria-label="Salvar alterações"><Save size={17} /><span>Salvar alterações</span></button></>}
+            {!['senha', 'solicitacoes'].includes(activeTab) && <>{activeTab !== 'landing' && <button type="button" className="workspace-button workspace-button-secondary" aria-label="Visualizar PDF" onClick={onPreview}><Eye size={17} /><span>Visualizar PDF</span></button>}<button type="submit" form={activeTab === 'landing' ? 'admin-site-form' : 'admin-proposal-form'} className="workspace-button workspace-button-primary" aria-label="Salvar alterações"><Save size={17} /><span>Salvar alterações</span></button></>}
             <span className="workspace-topbar-avatar" aria-label="Área administrativa">CA</span>
           </div>
         </header>
         <main id="workspace-content" className="workspace-content" tabIndex={-1}>
-          <div className="workspace-heading"><div><p className="workspace-eyebrow">{activeTab === 'senha' ? 'ESPAÇO DE TRABALHO' : 'GESTÃO DE PROPOSTAS'}</p><h1>{selected.label}</h1><p>{selected.description}</p></div><span className="workspace-heading-tag">{activeTab === 'nova' ? 'Personalizada' : activeTab === 'senha' ? 'Conta' : 'Modelo de proposta'}</span></div>
+          <div className="workspace-heading"><div><p className="workspace-eyebrow">{['senha', 'solicitacoes'].includes(activeTab) ? 'ESPAÇO DE TRABALHO' : 'GESTÃO DE PROPOSTAS'}</p><h1>{selected.label}</h1><p>{selected.description}</p></div><span className="workspace-heading-tag">{activeTab === 'nova' ? 'Personalizada' : activeTab === 'senha' ? 'Conta' : activeTab === 'solicitacoes' ? 'Histórico' : 'Modelo de proposta'}</span></div>
           {children}
           <footer className="workspace-footer">Camila’s Cerimonial <span>Feito para cuidar de cada detalhe.</span></footer>
         </main>
