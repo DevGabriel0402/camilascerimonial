@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { defaultProposals } from '../App';
-import { maskCurrency, maskPhone, maskCPFOrCNPJ, maskDate } from '../utils/masks';
+import { maskCurrency } from '../utils/masks';
 import {
   Save, LogOut, FileText, Plus, Trash2, Eye, Key, CheckCircle2, Home, Database,
   ChevronDown, ChevronUp, UserCheck, HeartHandshake, CheckSquare, Square, Users,
@@ -317,7 +317,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
 
   return (
     <div className="admin-shell">
-      
+
       {/* PDF Modal Viewer */}
       {pdfPreviewProposal && (
         <ProposalPdfGenerator
@@ -327,7 +327,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
       )}
 
       <div className="admin-wrapper">
-        
+
         {/* Top Control Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
           <div>
@@ -419,7 +419,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
         {/* ACCORDIONS FORM */}
         {activeTab !== 'senha' && currentProposal && (
           <form onSubmit={handleSaveProposal} className="form-clean">
-            
+
             {/* ACCORDION 1: Dados Principais */}
             <div style={{ background: 'var(--bg-page)', border: '1px solid var(--border-color)', borderRadius: '14px', marginBottom: '15px', overflow: 'hidden' }}>
               <div
@@ -448,45 +448,6 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                    <div>
-                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>Nome do Cliente / Noivos</label>
-                      <input
-                        type="text"
-                        placeholder="Ex: Maria & João"
-                        value={currentProposal.clientName || ''}
-                        onChange={(e) => handleInputChange('clientName', e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>CPF ou CNPJ do Cliente</label>
-                      <input
-                        type="text"
-                        placeholder="000.000.000-00"
-                        value={currentProposal.clientCpfCnpj || ''}
-                        onChange={(e) => handleInputChange('clientCpfCnpj', maskCPFOrCNPJ(e.target.value))}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>Telefone / WhatsApp</label>
-                      <input
-                        type="text"
-                        placeholder="(31) 98516-5246"
-                        value={currentProposal.clientPhone || ''}
-                        onChange={(e) => handleInputChange('clientPhone', maskPhone(e.target.value))}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>Data do Evento (DD/MM/AAAA)</label>
-                      <input
-                        type="text"
-                        placeholder="25/11/2026"
-                        value={currentProposal.eventDate || ''}
-                        onChange={(e) => handleInputChange('eventDate', maskDate(e.target.value))}
-                      />
-                    </div>
 
                     <div>
                       <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>Tipo de Evento</label>
@@ -550,7 +511,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
                 <div style={{ padding: '20px' }}>
                   {currentProposal.categorizedItems && currentProposal.categorizedItems.map((catGroup) => (
                     <div key={catGroup.id} style={{ background: '#ffffff', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '15px', marginBottom: '15px' }}>
-                      
+
                       <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '12px' }}>
                         <input
                           type="text"
@@ -638,17 +599,6 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
                 <div style={{ padding: '20px' }}>
                   <div style={{ marginBottom: '15px', background: '#ffffff', border: '1px solid var(--border-color)', padding: '15px', borderRadius: '10px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <div>
-                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>
-                          Qtd. Estimada de Convidados
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ex: 150 convidados"
-                          value={currentProposal.guestCount || ''}
-                          onChange={(e) => handleInputChange('guestCount', e.target.value)}
-                        />
-                      </div>
 
                       <div>
                         <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', fontWeight: '600' }}>
@@ -687,7 +637,7 @@ export default function AdminDashboard({ proposals, setProposals, onLogout }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {currentProposal.pricingByGuests?.tiers && currentProposal.pricingByGuests.tiers.map((tier) => (
                         <div key={tier.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: tier.selected ? 'var(--primary-gold-light)' : '#f8fafc', border: tier.selected ? '1px solid var(--primary-gold)' : '1px solid var(--border-color)', padding: '10px', borderRadius: '8px' }}>
-                          
+
                           <div
                             onClick={() => handleSelectGuestTier(tier.id)}
                             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}

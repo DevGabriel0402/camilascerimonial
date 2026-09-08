@@ -199,7 +199,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                     {proposal.clientEmail && <InfoRow label="E-mail" value={proposal.clientEmail} />}
                     {proposal.eventDate && <InfoRow label="Data do Evento" value={proposal.eventDate} />}
                     {proposal.eventType && <InfoRow label="Tipo de Evento" value={proposal.eventType} />}
-                    {proposal.guestCount && <InfoRow label="Estimativa de Convidados" value={`${proposal.guestCount} pessoas`} />}
+                    {proposal.guestCount && <InfoRow label="Estimativa de Convidados" value={proposal.guestCount} />}
                   </div>
                 </div>
               )}
@@ -330,7 +330,7 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
                           Valor do Investimento
                         </p>
                         <p style={{ margin: '4px 0 0 0', color: 'rgba(243,235,221,0.7)', fontSize: '11px' }}>
-                          Para {proposal.guestCount || '—'} convidados
+                          {proposal.guestCount || 'Quantidade de convidados a definir'}
                         </p>
                       </div>
                       <div style={{ textAlign: 'right' }}>

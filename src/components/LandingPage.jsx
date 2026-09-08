@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { Download, MessageCircle, Lock, FileText, CheckCircle2, Star, X, ChevronRight, FileCheck } from 'lucide-react';
-import { maskPhone, maskCPF, maskDate } from '../utils/masks';
+import { maskPhone, maskCPF } from '../utils/masks';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -26,8 +26,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
     phone: '',
     email: '',
     cpf: '',
-    eventDate: '',
-    guestCount: ''
+    guestTierId: ''
   });
 
   useEffect(() => {
@@ -53,6 +52,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
 
   // Trigger Client Data Form when clicking Proposal Buttons
   const handleOpenProposalClientForm = (type) => {
+    setClientData({ name: '', phone: '', email: '', cpf: '', guestTierId: '' });
     setProposalModalType(type);
   };
 
@@ -66,6 +66,13 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
 
     const baseProposal = proposals[proposalModalType] || {};
     
+    const tiers = baseProposal.pricingByGuests?.tiers || [];
+    const selectedTier = tiers.find(tier => tier.id === clientData.guestTierId);
+    if (tiers.length > 0 && !selectedTier) {
+      alert('Selecione uma opção de convidados.');
+      return;
+    }
+
     // Combine base template with client details
     const customProposalForPdf = {
       ...baseProposal,
@@ -73,14 +80,21 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       clientPhone: clientData.phone,
       clientEmail: clientData.email,
       clientCpfCnpj: clientData.cpf,
-      eventDate: clientData.eventDate || baseProposal.eventDate || 'A definir',
-      guestCount: clientData.guestCount || baseProposal.guestCount || '150'
+      eventDate: 'A definir',
+      guestCount: selectedTier?.range || '',
+      price: selectedTier ? (selectedTier.price || 'Sob consulta') : baseProposal.price,
+      pricingByGuests: {
+        ...baseProposal.pricingByGuests,
+        guestCount: selectedTier?.range || '',
+        finalPrice: selectedTier ? (selectedTier.price || 'Sob consulta') : baseProposal.price,
+        tiers: tiers.map(tier => ({ ...tier, selected: tier.id === selectedTier?.id }))
+      }
     };
 
     setProposalModalType(null);
     onSelectProposalForPdf(customProposalForPdf);
     // Reset form for next use
-    setClientData({ name: '', phone: '', email: '', cpf: '', eventDate: '', guestCount: '' });
+    setClientData({ name: '', phone: '', email: '', cpf: '', guestTierId: '' });
   };
 
   const carouselImages = [
@@ -355,26 +369,27 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {(proposals[proposalModalType]?.pricingByGuests?.tiers || []).length > 0 && (
                 <div>
-                  <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Data do Evento</label>
-                  <input
-                    type="text"
-                    placeholder="25/11/2026"
-                    value={clientData.eventDate}
-                    onChange={(e) => setClientData(prev => ({ ...prev, eventDate: maskDate(e.target.value) }))}
-                  />
+                  <label htmlFor="proposal-guest-tier" style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Opções de convidados *</label>
+                  <select
+                    id="proposal-guest-tier"
+                    value={clientData.guestTierId}
+                    onChange={(e) => setClientData(prev => ({ ...prev, guestTierId: e.target.value }))}
+                    required
+                  >
+                    <option value="">Selecione uma opção</option>
+                    {proposals[proposalModalType].pricingByGuests.tiers.map(tier => (
+                      <option key={tier.id} value={tier.id}>{tier.range} - {tier.price || 'Sob consulta'}</option>
+                    ))}
+                  </select>
+                  {clientData.guestTierId && (
+                    <p role="status" style={{ color: 'var(--secondary-navy)', fontWeight: 'bold', marginTop: '10px' }}>
+                      Valor da proposta: {proposals[proposalModalType].pricingByGuests.tiers.find(tier => tier.id === clientData.guestTierId)?.price || 'Sob consulta'}
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Nº de Convidados</label>
-                  <input
-                    type="number"
-                    placeholder="Ex: 150"
-                    value={clientData.guestCount}
-                    onChange={(e) => setClientData(prev => ({ ...prev, guestCount: e.target.value }))}
-                  />
-                </div>
-              </div>
+              )}
 
               <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '10px' }}>
                 <Download size={16} /> Gerar PDF Personalizado

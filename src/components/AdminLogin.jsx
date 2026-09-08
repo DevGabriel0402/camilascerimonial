@@ -20,7 +20,7 @@ export default function AdminLogin({ onLoginSuccess }) {
       onLoginSuccess();
     } catch (err) {
       console.error("Erro no Firebase Auth:", err.code, err.message);
-      
+
       switch (err.code) {
         case 'auth/invalid-credential':
         case 'auth/user-not-found':
@@ -44,7 +44,7 @@ export default function AdminLogin({ onLoginSuccess }) {
   return (
     <div className="modal-overlay" style={{ background: 'var(--bg-page)' }}>
       <div className="modal-content-clean form-clean" style={{ maxWidth: '420px', border: '1px solid var(--border-color)' }}>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <Link to="/" style={{ color: 'var(--secondary-navy)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600' }}>
             <ArrowLeft size={16} /> Voltar ao Site
