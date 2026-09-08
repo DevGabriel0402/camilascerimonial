@@ -1,16 +1,43 @@
-import React from 'react';
-import { Download, X } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Download, X, FileCheck } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 export default function ProposalPdfGenerator({ proposal, onClose }) {
+  const docRef = useRef(null);
+
   const handleDownloadPdf = () => {
-    const element = document.getElementById('pdf-proposal-content');
+    const element = docRef.current;
+    if (!element) return;
+
+    const clientSlug = (proposal.clientName || proposal.title || 'proposta')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+
     const opt = {
-      margin: 10,
-      filename: `Proposta_${proposal.title.replace(/\s+/g, '_')}_CamilasCerimonial.pdf`,
+      margin: 0,
+      filename: `Proposta_CamilasCerimonial_${clientSlug}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        letterRendering: true,
+        allowTaint: true,
+        scrollY: 0,
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.pdf-page-break-before',
+        avoid: [
+          '.pdf-section',
+          '.pdf-item-row',
+          '.pdf-payment-card',
+          '.pdf-tier-row',
+          'tr',
+          'li',
+        ],
+      },
     };
 
     html2pdf().set(opt).from(element).save();
@@ -18,107 +45,476 @@ export default function ProposalPdfGenerator({ proposal, onClose }) {
 
   if (!proposal) return null;
 
+  const guestTiers = proposal.pricingByGuests?.tiers || [];
+  const enabledMethods = (proposal.paymentOptions?.methods || []).filter(m => m.enabled !== false);
+  const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
   return (
-    <div className="modal" style={{ display: 'flex', overflowY: 'auto', padding: '20px' }}>
-      <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '850px', position: 'relative', margin: 'auto' }}>
-        
-        {/* Top Control Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 25px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
-          <h3 style={{ color: 'var(--secundary-color)', margin: 0 }}>Visualização & Gerador de PDF</h3>
+    <div
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.7)',
+        backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', zIndex: 99999, padding: '12px',
+      }}
+    >
+      <div style={{
+        background: '#F8F7F4', border: '1px solid #ddd', borderRadius: '18px',
+        width: '100%', maxWidth: '880px', maxHeight: '94vh',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '0 30px 60px rgba(0,0,0,0.25)',
+      }}>
+
+        {/* ── Top Bar ── */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '14px 22px', background: '#1E3562',
+          borderRadius: '18px 18px 0 0', flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <FileCheck color="#C5A467" size={20} />
+            <span style={{ color: '#fff', fontSize: '15px', fontWeight: '700', letterSpacing: '0.3px' }}>
+              Proposta Comercial — Camila's Cerimonial
+            </span>
+          </div>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn-success" onClick={handleDownloadPdf}>
-              <Download size={18} /> Baixar PDF
+            <button
+              onClick={handleDownloadPdf}
+              style={{
+                background: '#C5A467', color: '#fff', border: 'none', borderRadius: '8px',
+                padding: '8px 18px', fontSize: '13px', fontWeight: '700',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                letterSpacing: '0.3px',
+              }}
+            >
+              <Download size={15} /> Baixar PDF
             </button>
-            <button className="btn-secondary" onClick={onClose}>
-              <X size={18} /> Fechar
+            <button
+              onClick={onClose}
+              style={{
+                background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none',
+                borderRadius: '8px', width: '36px', height: '36px',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* PDF Document Container */}
-        <div id="pdf-proposal-content" className="pdf-template">
-          {/* Header */}
-          <div className="pdf-header">
-            <div>
-              <h1 style={{ margin: 0, color: 'var(--secundary-color)', fontSize: '24px' }}>Camila's Cerimonial</h1>
-              <p style={{ color: 'var(--primary-dark)', margin: '4px 0 0 0', fontWeight: 'bold' }}>
-                Assessoria e Cerimonial de Eventos
+        {/* ── Scrollable Preview Area ── */}
+        <div style={{ overflowY: 'auto', flex: 1, padding: '20px', background: '#CBD5E1' }}>
+
+          {/* ══════════ PDF DOCUMENT ══════════ */}
+          <div
+            ref={docRef}
+            style={{
+              background: '#FFFFFF',
+              width: '210mm',
+              minHeight: '297mm',
+              margin: '0 auto',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              color: '#1a1a2e',
+              fontSize: '12px',
+              lineHeight: '1.65',
+            }}
+          >
+
+            {/* ── COVER HEADER ── */}
+            <div style={{
+              background: 'linear-gradient(135deg, #1E3562 0%, #0f1f3d 60%, #162d56 100%)',
+              padding: '36px 42px 28px 42px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              {/* Decorative circles */}
+              <div style={{
+                position: 'absolute', top: '-40px', right: '-40px',
+                width: '180px', height: '180px', borderRadius: '50%',
+                background: 'rgba(197,164,103,0.08)', pointerEvents: 'none',
+              }} />
+              <div style={{
+                position: 'absolute', bottom: '-30px', left: '30%',
+                width: '120px', height: '120px', borderRadius: '50%',
+                background: 'rgba(197,164,103,0.05)', pointerEvents: 'none',
+              }} />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+                    <img
+                      src="/src/logo.png"
+                      alt="Logo"
+                      style={{ width: '58px', height: '58px', objectFit: 'scale-down', borderRadius: '50%', border: '2px solid rgba(197,164,103,0.5)', background: 'rgba(250, 250, 250, 0.98)', padding: '4px' }}
+                      crossOrigin="anonymous"
+                    />
+                    <div>
+                      <h1 style={{ margin: 0, color: '#FFFFFF', fontSize: '24px', fontWeight: '700', letterSpacing: '0.5px', lineHeight: '1.1' }}>
+                        Camila's Cerimonial
+                      </h1>
+                      <p style={{ margin: '3px 0 0 0', color: '#C5A467', fontSize: '10px', fontWeight: '600', letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+                        Assessoria &amp; Cerimonial de Eventos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px' }}>Emitido em</p>
+                  <p style={{ margin: '2px 0 0 0', color: 'rgba(255,255,255,0.8)', fontSize: '11px', fontWeight: '600' }}>{today}</p>
+                </div>
+              </div>
+
+              {/* Divider line */}
+              <div style={{ borderTop: '1px solid rgba(197,164,103,0.3)', margin: '18px 0 16px 0' }} />
+
+              <h2 style={{
+                margin: 0, color: '#F3EBDD', fontSize: '18px',
+                fontWeight: '700', letterSpacing: '0.5px', position: 'relative',
+                textTransform: 'uppercase',
+              }}>
+                {proposal.title || 'Proposta Comercial'}
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: 'rgba(243,235,221,0.6)', fontSize: '10px', letterSpacing: '0.5px' }}>
+                Documento gerado exclusivamente para o cliente abaixo
               </p>
             </div>
-            <img src="/src/logo.png" alt="Logo" style={{ width: '70px', height: '70px', objectFit: 'contain' }} />
-          </div>
 
-          {/* Title */}
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h2 style={{ color: 'var(--secundary-color)', fontSize: '20px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              {proposal.title || 'Proposta Comercial'}
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>
-              Transformando sonhos em momentos inesquecíveis
-            </p>
-          </div>
+            {/* ── GOLD ACCENT BAR ── */}
+            <div style={{ height: '4px', background: 'linear-gradient(90deg, #C5A467, #DFC08A, #C5A467)' }} />
 
-          {/* Client Info Grid if provided */}
-          {(proposal.clientName || proposal.eventDate) && (
-            <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', marginBottom: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {proposal.clientName && <div><strong>Cliente:</strong> {proposal.clientName}</div>}
-              {proposal.eventDate && <div><strong>Data do Evento:</strong> {proposal.eventDate}</div>}
-              {proposal.eventType && <div><strong>Tipo de Evento:</strong> {proposal.eventType}</div>}
-              {proposal.guestCount && <div><strong>Convidados:</strong> {proposal.guestCount} pessoas</div>}
+            {/* ── BODY CONTENT ── */}
+            <div style={{ padding: '32px 42px' }}>
+
+              {/* 1. DADOS DO CLIENTE */}
+              {(proposal.clientName || proposal.clientCpfCnpj || proposal.clientPhone || proposal.eventDate) && (
+                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                  <SectionTitle icon="👤" title="Dados do Cliente" />
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr',
+                    gap: '10px', marginTop: '12px',
+                  }}>
+                    {proposal.clientName && <InfoRow label="Cliente / Noivos" value={proposal.clientName} />}
+                    {proposal.clientCpfCnpj && <InfoRow label="CPF" value={proposal.clientCpfCnpj} />}
+                    {proposal.clientPhone && <InfoRow label="WhatsApp" value={proposal.clientPhone} />}
+                    {proposal.clientEmail && <InfoRow label="E-mail" value={proposal.clientEmail} />}
+                    {proposal.eventDate && <InfoRow label="Data do Evento" value={proposal.eventDate} />}
+                    {proposal.eventType && <InfoRow label="Tipo de Evento" value={proposal.eventType} />}
+                    {proposal.guestCount && <InfoRow label="Estimativa de Convidados" value={`${proposal.guestCount} pessoas`} />}
+                  </div>
+                </div>
+              )}
+
+              <Divider />
+
+              {/* 2. SOBRE NÓS */}
+              {proposal.aboutUs && (
+                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                  <SectionTitle icon="✨" title="Sobre Camila's Cerimonial" />
+                  <div style={{
+                    marginTop: '12px', background: '#F9F6F0',
+                    border: '1px solid #E8DCC8', borderLeft: '4px solid #C5A467',
+                    borderRadius: '0 8px 8px 0', padding: '14px 18px',
+                  }}>
+                    <p style={{ margin: 0, color: '#334155', fontSize: '12px', lineHeight: '1.75', fontStyle: 'italic' }}>
+                      "{proposal.aboutUs}"
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <Divider />
+
+              {/* 3. SERVIÇOS INCLUSOS */}
+              {proposal.categorizedItems && proposal.categorizedItems.length > 0 && (
+                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                  <SectionTitle icon="📋" title="Serviços &amp; Itens Inclusos" />
+                  <div style={{ marginTop: '14px' }}>
+                    {proposal.categorizedItems.map((catGroup) => {
+                      const activeSubitems = (catGroup.subitems || []).filter(s => s.selected !== false);
+                      if (activeSubitems.length === 0) return null;
+                      return (
+                        <div
+                          key={catGroup.id}
+                          className="pdf-section"
+                          style={{ pageBreakInside: 'avoid', marginBottom: '18px' }}
+                        >
+                          <div style={{
+                            background: '#1E3562', color: '#F3EBDD',
+                            padding: '7px 14px', borderRadius: '6px',
+                            fontSize: '11px', fontWeight: '700',
+                            letterSpacing: '0.5px', textTransform: 'uppercase',
+                            marginBottom: '8px',
+                          }}>
+                            {catGroup.category}
+                          </div>
+                          <div style={{ paddingLeft: '4px' }}>
+                            {activeSubitems.map((sub, idx) => (
+                              <div
+                                key={sub.id}
+                                className="pdf-item-row"
+                                style={{
+                                  pageBreakInside: 'avoid',
+                                  display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                  padding: '7px 10px',
+                                  background: idx % 2 === 0 ? '#FAFAFA' : '#FFFFFF',
+                                  borderBottom: '1px solid #F1F5F9',
+                                  fontSize: '12px',
+                                }}
+                              >
+                                <span style={{ color: '#C5A467', fontWeight: '900', fontSize: '14px', lineHeight: '1.2', flexShrink: 0 }}>✓</span>
+                                <span style={{ color: '#1e293b', lineHeight: '1.5' }}>{sub.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <Divider />
+
+              {/* 4. INVESTIMENTO */}
+              <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                <SectionTitle icon="💰" title="Investimento" />
+                <div style={{ marginTop: '14px' }}>
+                  {guestTiers.length > 0 ? (
+                    <div style={{ border: '1px solid #CBD5E1', borderRadius: '8px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                        <thead>
+                          <tr style={{ background: '#1E3562' }}>
+                            <th style={{ padding: '10px 16px', textAlign: 'left', color: '#F3EBDD', fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              Faixa de Convidados
+                            </th>
+                            <th style={{ padding: '10px 16px', textAlign: 'right', color: '#C5A467', fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              Investimento
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {guestTiers.map((tier, idx) => (
+                            <tr
+                              key={tier.id || idx}
+                              className="pdf-tier-row"
+                              style={{
+                                pageBreakInside: 'avoid',
+                                background: tier.selected ? '#F9F6F0' : idx % 2 === 0 ? '#fff' : '#F8FAFC',
+                              }}
+                            >
+                              <td style={{ padding: '9px 16px', borderBottom: '1px solid #F1F5F9', color: '#334155' }}>
+                                {tier.range}
+                                {tier.selected && (
+                                  <span style={{ marginLeft: '8px', fontSize: '9px', color: '#C5A467', fontWeight: '700', textTransform: 'uppercase', background: '#F9F2E7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #C5A467' }}>
+                                    ★ Selecionado
+                                  </span>
+                                )}
+                              </td>
+                              <td style={{ padding: '9px 16px', borderBottom: '1px solid #F1F5F9', textAlign: 'right', color: '#1E3562', fontWeight: '700' }}>
+                                {tier.price}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div style={{
+                      background: 'linear-gradient(135deg, #1E3562 0%, #0f1f3d 100%)',
+                      borderRadius: '10px', padding: '20px 24px',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      borderLeft: '5px solid #C5A467',
+                    }}>
+                      <div>
+                        <p style={{ margin: 0, color: '#C5A467', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                          Valor do Investimento
+                        </p>
+                        <p style={{ margin: '4px 0 0 0', color: 'rgba(243,235,221,0.7)', fontSize: '11px' }}>
+                          Para {proposal.guestCount || '—'} convidados
+                        </p>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ color: '#DFC08A', fontSize: '26px', fontWeight: '700', lineHeight: '1' }}>
+                          {proposal.price || 'Sob Consulta'}
+                        </div>
+                        <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>
+                          Sujeito a confirmação
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Divider />
+
+              {/* 5. FORMAS DE PAGAMENTO */}
+              {enabledMethods.length > 0 && (
+                <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '28px' }}>
+                  <SectionTitle icon="💳" title="Formas de Pagamento" />
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${Math.min(enabledMethods.length, 3)}, 1fr)`,
+                    gap: '10px', marginTop: '14px',
+                  }}>
+                    {enabledMethods.map((method) => (
+                      <div
+                        key={method.id}
+                        className="pdf-payment-card"
+                        style={{
+                          pageBreakInside: 'avoid',
+                          background: '#F9F6F0', border: '1px solid #E8DCC8',
+                          borderRadius: '8px', padding: '12px 14px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                          <span style={{ fontSize: '16px' }}>
+                            {method.type === 'pix' ? '📱' : method.type === 'card' ? '💳' : '🏦'}
+                          </span>
+                          <span style={{ fontWeight: '700', fontSize: '11px', color: '#1E3562' }}>
+                            {method.label}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '10.5px', color: '#475569', lineHeight: '1.5' }}>
+                          {method.details}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {(proposal.paymentOptions?.terms || proposal.paymentTerms) && (
+                    <div style={{
+                      marginTop: '12px', background: '#EEF2FF',
+                      border: '1px solid #C7D2FE', borderRadius: '8px', padding: '10px 14px',
+                    }}>
+                      <p style={{ margin: 0, fontSize: '11px', color: '#3730a3' }}>
+                        <strong>📌 Condições Gerais:</strong>{' '}
+                        {proposal.paymentOptions?.terms || proposal.paymentTerms}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <Divider />
+
+              {/* 6. SAUDAÇÃO FINAL */}
+              <div className="pdf-section" style={{ pageBreakInside: 'avoid', marginBottom: '32px' }}>
+                {proposal.finalGreeting?.message && (
+                  <div style={{
+                    background: '#F9F6F0', border: '1px solid #E8DCC8',
+                    borderRadius: '10px', padding: '18px 22px', textAlign: 'center',
+                    marginBottom: '20px',
+                  }}>
+                    <p style={{ margin: 0, color: '#5C4A2A', fontSize: '13px', fontStyle: 'italic', lineHeight: '1.7' }}>
+                      ❝ {proposal.finalGreeting.message} ❞
+                    </p>
+                  </div>
+                )}
+
+                {/* Assinaturas */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr',
+                  gap: '30px', marginTop: '24px', paddingTop: '16px',
+                  borderTop: '1px dashed #CBD5E1',
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ borderBottom: '1.5px solid #94A3B8', marginBottom: '6px', height: '40px' }} />
+                    <p style={{ margin: 0, fontWeight: '700', color: '#1E3562', fontSize: '11px' }}>
+                      Camila's Cerimonial
+                    </p>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '9.5px', color: '#64748B' }}>
+                      Assinatura / Responsável
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ borderBottom: '1.5px solid #94A3B8', marginBottom: '6px', height: '40px' }} />
+                    <p style={{ margin: 0, fontWeight: '700', color: '#1E3562', fontSize: '11px' }}>
+                      {proposal.clientName || 'Cliente'}
+                    </p>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '9.5px', color: '#64748B' }}>
+                      Assinatura / Contratante
+                    </p>
+                  </div>
+                </div>
+              </div>
+
             </div>
-          )}
 
-          {/* Description */}
-          <div className="pdf-section">
-            <h3>Descrição do Serviço</h3>
-            <p style={{ lineHeight: '1.6', color: '#334155', whiteSpace: 'pre-line' }}>
-              {proposal.description}
-            </p>
-          </div>
-
-          {/* Included Services List */}
-          {proposal.items && proposal.items.length > 0 && (
-            <div className="pdf-section">
-              <h3>O que está incluso neste pacote:</h3>
-              <ul className="pdf-items-list">
-                {proposal.items.map((item, idx) => (
-                  <li key={idx}>
-                    <span style={{ color: 'var(--primary-dark)', fontWeight: 'bold' }}>✓</span> {item}
-                  </li>
-                ))}
-              </ul>
+            {/* ── FOOTER ── */}
+            <div style={{
+              background: '#1E3562',
+              padding: '16px 42px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              flexWrap: 'wrap', gap: '8px',
+            }}>
+              <div>
+                <p style={{ margin: 0, color: '#C5A467', fontWeight: '700', fontSize: '11px', letterSpacing: '0.5px' }}>
+                  Camila's Cerimonial &amp; Assessoria
+                </p>
+                <p style={{ margin: '2px 0 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '9.5px' }}>
+                  (31) 98516-5246  ·  @camilascerimonial
+                </p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ margin: 0, color: '#C5A467', fontWeight: '700', fontSize: '10px' }}>
+                  {proposal.finalGreeting?.validity || 'Proposta válida por 15 dias.'}
+                </p>
+                <p style={{ margin: '2px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>
+                  Documento gerado eletronicamente
+                </p>
+              </div>
             </div>
-          )}
 
-          {/* Pricing & Investment */}
-          <div className="pdf-section" style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', borderLeft: '4px solid var(--primary-color)' }}>
-            <h3 style={{ border: 'none', padding: 0, margin: '0 0 10px 0' }}>Investimento & Condições</h3>
-            <p style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--secundary-color)', margin: '5px 0' }}>
-              {proposal.price || 'Sob Consulta'}
-            </p>
-            {proposal.paymentTerms && (
-              <p style={{ fontSize: '13px', color: '#475569', marginTop: '6px', whiteSpace: 'pre-line' }}>
-                <strong>Formas de Pagamento:</strong> {proposal.paymentTerms}
-              </p>
-            )}
           </div>
-
-          {/* Footer & Signature */}
-          <div style={{ marginTop: '50px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '12px', color: '#64748b' }}>
-            <div>
-              <p><strong>Camila's Cerimonial</strong></p>
-              <p>WhatsApp: (31) 98516-5246</p>
-              <p>Instagram: @camilascerimonial</p>
-            </div>
-            <div style={{ textAlign: 'center', width: '200px' }}>
-              <div style={{ borderBottom: '1px solid #94a3b8', marginBottom: '5px', height: '40px' }}></div>
-              <p>Camila's Cerimonial</p>
-            </div>
-          </div>
-
+          {/* ══════════ FIM DO DOCUMENTO ══════════ */}
         </div>
-
       </div>
+    </div>
+  );
+}
+
+/* ── Subcomponentes auxiliares de layout ── */
+function SectionTitle({ icon, title }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+      <span style={{ fontSize: '15px' }}>{icon}</span>
+      <h3 style={{
+        margin: 0, color: '#1E3562', fontSize: '14px', fontWeight: '700',
+        letterSpacing: '0.3px', borderBottom: '2px solid #C5A467',
+        paddingBottom: '4px', flex: 1,
+      }}>
+        {title}
+      </h3>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div style={{
+      background: '#F9F6F0', border: '1px solid #E8DCC8',
+      borderRadius: '6px', padding: '8px 12px',
+    }}>
+      <p style={{ margin: 0, fontSize: '9.5px', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '600' }}>
+        {label}
+      </p>
+      <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#1E3562', fontWeight: '700' }}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '10px',
+      margin: '0 0 26px 0',
+    }}>
+      <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, #E8DCC8)' }} />
+      <span style={{ color: '#C5A467', fontSize: '14px' }}>✦</span>
+      <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, #E8DCC8, transparent)' }} />
     </div>
   );
 }

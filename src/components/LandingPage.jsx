@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { Download, MessageCircle, Lock, FileText, X } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
+import { Download, MessageCircle, Lock, FileText, CheckCircle2, Star, X, ChevronRight, FileCheck } from 'lucide-react';
+import { maskPhone, maskCPF, maskDate } from '../utils/masks';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -11,227 +11,453 @@ import 'swiper/css/pagination';
 
 export default function LandingPage({ proposals, onSelectProposalForPdf }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [proposalModalType, setProposalModalType] = useState(null); // 'completa' | 'cerimonial' | null
   const [loading, setLoading] = useState(true);
+
+  // General Contact Form
   const [formName, setFormName] = useState('');
   const [eventType, setEventType] = useState('nenhum');
+  const [guestCount, setGuestCount] = useState('');
   const [formText, setFormText] = useState('');
+
+  // Proposal PDF Client Data Form
+  const [clientData, setClientData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    cpf: '',
+    eventDate: '',
+    guestCount: ''
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1200);
+    }, 600);
     return () => clearTimeout(timer);
   }, []);
 
   const handleSendWhatsApp = (e) => {
     e.preventDefault();
     if (!formName || eventType === 'nenhum') {
-      alert('Verifique se foi informado seu nome e o tipo do evento!');
+      alert('Por favor, informe seu nome e o tipo do evento!');
       return;
     }
 
-    const mensagem = `Olá Camila's Cerimonial tudo bem? Meu nome é ${formName} e estou entrando em contato para fazer um orçamento, segue as informações:\n\n*Tipo de Evento:* ${eventType}\n*Observação:* ${formText}\n\nAguardando sua resposta.`;
+    const mensagem = `Olá Camila's Cerimonial! Meu nome é ${formName}.\n\n*Tipo de Evento:* ${eventType}\n*Estimativa de Convidados:* ${guestCount || 'Não informado'}\n*Observações:* ${formText || 'Sem observações'}\n\nGostaria de solicitar um orçamento e consultar datas!`;
     const uri = encodeURIComponent(mensagem);
     const contato = '31985165246';
     const url = `https://wa.me/55${contato}?text=${uri}`;
     window.open(url, '_blank');
   };
 
+  // Trigger Client Data Form when clicking Proposal Buttons
+  const handleOpenProposalClientForm = (type) => {
+    setProposalModalType(type);
+  };
+
+  // Submit Client Data Form and Generate Custom PDF
+  const handleGenerateCustomPdf = (e) => {
+    e.preventDefault();
+    if (!clientData.name || !clientData.phone || !clientData.cpf) {
+      alert('Por favor, informe seu Nome, WhatsApp e CPF para personalizar o PDF!');
+      return;
+    }
+
+    const baseProposal = proposals[proposalModalType] || {};
+    
+    // Combine base template with client details
+    const customProposalForPdf = {
+      ...baseProposal,
+      clientName: clientData.name,
+      clientPhone: clientData.phone,
+      clientEmail: clientData.email,
+      clientCpfCnpj: clientData.cpf,
+      eventDate: clientData.eventDate || baseProposal.eventDate || 'A definir',
+      guestCount: clientData.guestCount || baseProposal.guestCount || '150'
+    };
+
+    setProposalModalType(null);
+    onSelectProposalForPdf(customProposalForPdf);
+    // Reset form for next use
+    setClientData({ name: '', phone: '', email: '', cpf: '', eventDate: '', guestCount: '' });
+  };
+
   const carouselImages = [
-    '/images/12.webp',
-    '/images/10.webp',
-    '/images/15.webp',
-    '/images/13.webp',
-    '/images/05.webp',
-    '/images/06.webp',
-    '/images/07.webp',
-    '/images/08.webp',
-    '/images/09.webp',
-    '/images/02.webp',
-    '/images/11.webp',
-    '/images/01.webp',
-    '/images/04.webp',
-    '/images/14.webp',
-    '/images/03.webp',
+    { url: '/images/12.webp', title: 'Casamentos Inesquecíveis' },
+    { url: '/images/10.webp', title: 'Momentos Mágicos' },
+    { url: '/images/15.webp', title: 'Festas de 15 Anos' },
+    { url: '/images/13.webp', title: 'Decoração & Sofisticação' },
+    { url: '/images/05.webp', title: 'Eventos Exclusivos' },
+    { url: '/images/06.webp', title: 'Cerimônias ao Ar Livre' },
+    { url: '/images/07.webp', title: 'Produção Completa' },
+    { url: '/images/08.webp', title: 'Atenção a Cada Detalhe' },
+    { url: '/images/09.webp', title: 'Sonhos Realizados' },
+    { url: '/images/02.webp', title: 'Equipe Especializada' },
   ];
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="bar-loading"></div>
+      <div className="loading-screen">
+        <div className="spinner-clean"></div>
       </div>
     );
   }
 
   return (
-    <div id="body">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
+      
       {/* Floating WhatsApp */}
       <a
-        className="whatsapp"
+        className="whatsapp-float"
         href="https://wa.me/5531985165246"
         target="_blank"
         rel="noopener noreferrer"
+        title="Falar no WhatsApp"
       >
-        <img src="/src/whatsApp-icon.svg" alt="WhatsApp" />
+        <MessageCircle size={26} />
       </a>
 
-      {/* Modal Formulário */}
-      {modalOpen && (
-        <div className="modal" id="modal">
-          <form id="formulario" onSubmit={handleSendWhatsApp}>
-            <div id="btn-fechar" onClick={() => setModalOpen(false)}>
-              &times;
+      {/* Header Bar */}
+      <header className="header-nav">
+        <a href="#" className="brand-logo-container" title="Camila's Cerimonial">
+          <img src="/src/logo.png" alt="Camila's Cerimonial Logo" className="brand-logo-img" />
+          <div className="brand-name" style={{ fontSize: '18px' }}>Camila's Cerimonial</div>
+        </a>
+
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button className="btn-gold" onClick={() => setModalOpen(true)}>
+            Solicitar Orçamento
+          </button>
+          
+          <Link to="/admin" className="admin-icon-btn" title="Área do Administrador">
+            <Lock size={18} />
+          </Link>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="hero-section">
+        <img src="/src/logo.png" alt="Camila Cerimonial" className="profile-avatar" />
+
+        <h1 className="hero-title">
+          Juntos transformando <span className="gold-accent">sonhos em realidade</span>
+        </h1>
+
+        <p className="hero-subtitle">
+          Assessoria e cerimonial dedicados a cuidar de cada detalhe do seu casamento, festa de 15 anos ou evento especial.
+        </p>
+
+        {/* Stats Badges */}
+        <div className="stats-badge-grid">
+          <div className="stat-item">
+            <div className="stat-num">150+</div>
+            <div className="stat-label">Sonhos Realizados</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-num" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              5.0 <Star size={18} fill="var(--primary-gold)" color="var(--primary-gold)" />
             </div>
-            <h2>Preencha o formulário</h2>
-            <input
-              type="text"
-              placeholder="Informe seu nome..."
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              required
-            />
-            <div className="container-select">
+            <div className="stat-label">Avaliação dos Clientes</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-num">100%</div>
+            <div className="stat-label">Dedicação</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Marquee Strip */}
+      <div className="marquee-strip">
+        <div className="marquee-content">
+          {Array.from({ length: 10 }).map((_, idx) => (
+            <div className="marquee-item" key={idx}>
+              <span>Cerimonial e Assessoria ● Planejamento Completo ● Cuidado em Cada Detalhe</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Portfolio Gallery Swiper - BEFORE proposals */}
+      <section className="section-container" style={{ marginTop: '50px' }}>
+        <div className="section-header">
+          <div className="section-tag">Galeria de Eventos</div>
+          <h2 className="section-title">
+            Veja alguns <span className="navy-accent">momentos inesquecíveis</span>
+          </h2>
+        </div>
+
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          spaceBetween={20}
+          slidesPerView={1}
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 3500 }}
+          style={{ paddingBottom: '45px' }}
+        >
+          {carouselImages.map((img, index) => (
+            <SwiperSlide key={index}>
+              <div className="swiper-luxury-card">
+                <img src={img.url} alt={img.title} />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </section>
+
+      {/* Package Cards (Propostas) */}
+      <section className="section-container">
+        <div className="section-header">
+          <div className="section-tag">Propostas Comercial</div>
+          <h2 className="section-title">
+            Conheça nossos <span className="navy-accent">Pacotes & Serviços</span>
+          </h2>
+        </div>
+
+        <div className="packages-grid">
+          
+          {/* Completa */}
+          {proposals.completa && (
+            <div className="package-card featured">
+              <div className="package-badge">Mais Escolhida</div>
+              <div>
+                <h3 className="package-title">{proposals.completa.title}</h3>
+                <p className="package-desc">{proposals.completa.description}</p>
+                
+                <ul className="package-checklist">
+                  {proposals.completa.items && proposals.completa.items.map((item, i) => (
+                    <li key={i}>
+                      <CheckCircle2 size={16} /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                className="btn-gold"
+                style={{ width: '100%', marginTop: '15px' }}
+                onClick={() => handleOpenProposalClientForm('completa')}
+              >
+                <FileText size={16} /> Solicitar Proposta Completa (PDF)
+              </button>
+            </div>
+          )}
+
+          {/* Cerimonial */}
+          {proposals.cerimonial && (
+            <div className="package-card">
+              <div>
+                <h3 className="package-title">{proposals.cerimonial.title}</h3>
+                <p className="package-desc">{proposals.cerimonial.description}</p>
+                
+                <ul className="package-checklist">
+                  {proposals.cerimonial.items && proposals.cerimonial.items.map((item, i) => (
+                    <li key={i}>
+                      <CheckCircle2 size={16} /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                className="btn-outline-gold"
+                style={{ width: '100%', marginTop: '15px' }}
+                onClick={() => handleOpenProposalClientForm('cerimonial')}
+              >
+                <FileText size={16} /> Solicitar Proposta Cerimonial (PDF)
+              </button>
+            </div>
+          )}
+
+        </div>
+      </section>
+
+      {/* Bottom Floating Bar */}
+      <div className="bottom-callout-bar">
+        <div className="callout-info">
+          <img src="/src/logo.png" alt="Logo" className="callout-avatar" />
+          <div className="callout-text">
+            <h4>Faça seu Orçamento!</h4>
+            <p>E nos permita transformar seus sonhos em realidade.</p>
+          </div>
+        </div>
+        <button className="btn-gold" onClick={() => setModalOpen(true)}>
+          Conversar
+        </button>
+      </div>
+
+      {/* MODAL 1: Client Data Form for PDF Generation */}
+      {proposalModalType && (
+        <div className="modal-overlay" onClick={() => setProposalModalType(null)}>
+          <div className="modal-content-clean form-clean" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
+            <button className="modal-close-btn" onClick={() => setProposalModalType(null)}>
+              <X size={18} />
+            </button>
+
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--primary-gold-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px auto' }}>
+                <FileCheck size={26} color="var(--primary-gold)" />
+              </div>
+              <h2 className="serif-title" style={{ fontSize: '22px', color: 'var(--secondary-navy)' }}>
+                Gerar Sua Proposta Comercial em PDF
+              </h2>
+              <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Informe seus dados para receber o documento completo personalizado com seu nome e CPF.
+              </p>
+            </div>
+
+            <form onSubmit={handleGenerateCustomPdf}>
+              <div>
+                <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Seu Nome Completo *</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Maria Clara & João Pedro"
+                  value={clientData.name}
+                  onChange={(e) => setClientData(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>WhatsApp para Contato *</label>
+                <input
+                  type="text"
+                  placeholder="(31) 98516-5246"
+                  value={clientData.phone}
+                  onChange={(e) => setClientData(prev => ({ ...prev, phone: maskPhone(e.target.value) }))}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Seu E-mail (opcional)</label>
+                <input
+                  type="email"
+                  placeholder="seuemail@exemplo.com"
+                  value={clientData.email}
+                  onChange={(e) => setClientData(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>CPF do Solicitante *</label>
+                <input
+                  type="text"
+                  placeholder="000.000.000-00"
+                  value={clientData.cpf}
+                  onChange={(e) => setClientData(prev => ({ ...prev, cpf: maskCPF(e.target.value) }))}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Data do Evento</label>
+                  <input
+                    type="text"
+                    placeholder="25/11/2026"
+                    value={clientData.eventDate}
+                    onChange={(e) => setClientData(prev => ({ ...prev, eventDate: maskDate(e.target.value) }))}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--secondary-navy)', marginBottom: '3px', display: 'block' }}>Nº de Convidados</label>
+                  <input
+                    type="number"
+                    placeholder="Ex: 150"
+                    value={clientData.guestCount}
+                    onChange={(e) => setClientData(prev => ({ ...prev, guestCount: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '10px' }}>
+                <Download size={16} /> Gerar PDF Personalizado
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: General Contact Form */}
+      {modalOpen && (
+        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
+          <div className="modal-content-clean" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={() => setModalOpen(false)}>
+              <X size={18} />
+            </button>
+
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <h2 className="serif-title" style={{ fontSize: '24px', color: 'var(--secondary-navy)' }}>
+                Preencha o formulário
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Entraremos em contato via WhatsApp.
+              </p>
+            </div>
+
+            <form onSubmit={handleSendWhatsApp} className="form-clean">
+              <input
+                type="text"
+                placeholder="Informe seu nome..."
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                required
+              />
+
               <select
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
                 required
               >
                 <option value="nenhum">Selecione o tipo do evento</option>
-                <option value="Festa">Festa</option>
-                <option value="Festa de 15 anos">Festa de 15 anos</option>
                 <option value="Casamento">Casamento</option>
-                <option value="Assessoria">Assessoria</option>
-                <option value="Assessoria e Casamento completo">
-                  Assessoria e casamento completo
-                </option>
+                <option value="Festa de 15 Anos">Festa de 15 anos</option>
+                <option value="Assessoria Completa">Assessoria Completa</option>
+                <option value="Cerimonial do Dia">Cerimonial do Dia</option>
                 <option value="Outros">Outros</option>
               </select>
-            </div>
-            <textarea
-              rows="5"
-              placeholder="Envie uma mensagem (opcional)..."
-              value={formText}
-              onChange={(e) => setFormText(e.target.value)}
-            ></textarea>
-            <button type="submit">Solicitar Orçamento</button>
-          </form>
+
+              <input
+                type="number"
+                placeholder="Quantidade de convidados (opcional)..."
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+              />
+
+              <textarea
+                rows="3"
+                placeholder="Envie uma mensagem ou observação (opcional)..."
+                value={formText}
+                onChange={(e) => setFormText(e.target.value)}
+              ></textarea>
+
+              <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '6px' }}>
+                Solicitar Orçamento <ChevronRight size={16} />
+              </button>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* Card Contrate Já */}
-      <div className="card-contrate" id="card-contrate">
-        <div className="right">
-          <img src="/src/logo.png" alt="Logo" />
-          <p>
-            Faça seu Orçamento!
-            <span>E nos permita transformar seus sonhos em realidade!</span>
-          </p>
-        </div>
-        <button id="btn-contato" onClick={() => setModalOpen(true)}>
-          Conversar
-        </button>
-      </div>
-
-      {/* Container Principal */}
-      <div className="container" id="container">
-        {/* Perfil */}
-        <div className="perfil">
-          <img src="/src/logo.png" alt="Foto de Perfil" />
-          <div className="perfil-info">
-            <h1 className="name-title">Camila's Cerimonial</h1>
-            <p className="description">Juntos transformando sonhos em realidade.</p>
-          </div>
-        </div>
-
-        {/* Faixa Marquee */}
-        <div className="faixa">
-          <div className="faixa-content">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <p key={i}>Cerimonial e Assessoria ● &nbsp;</p>
-            ))}
-          </div>
-        </div>
-
-        {/* Card Titulo Carrossel */}
-        <div className="card-container">
-          <div className="card">Veja alguns sonhos que já realizamos!</div>
-        </div>
-
-        {/* Carrossel */}
-        <div className="swiper-wrapper-container">
-          <Swiper
-            modules={[Navigation, Pagination, Autoplay]}
-            spaceBetween={15}
-            slidesPerView={1}
-            breakpoints={{
-              640: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-            navigation
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 3500 }}
-            className="mySwiper"
-          >
-            {carouselImages.map((imgSrc, index) => (
-              <SwiperSlide key={index}>
-                <img src={imgSrc} alt={`Sonho Realizado ${index + 1}`} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-
-        {/* Proposta Section */}
-        <div className="proposta" id="proposta">
-          <h1>Baixe agora nossas propostas!</h1>
-          <div className="buttons">
-            <button
-              className="btn"
-              onClick={() => onSelectProposalForPdf('completa')}
-            >
-              <FileText size={18} />
-              Proposta Completa
-              <Download size={16} />
-            </button>
-
-            <button
-              className="btn"
-              onClick={() => onSelectProposalForPdf('cerimonial')}
-            >
-              <FileText size={18} />
-              Proposta Cerimonial
-              <Download size={16} />
-            </button>
-
-            <Link to="/admin" className="btn admin-link-btn">
-              <Lock size={16} /> Painel Admin
-            </Link>
-          </div>
-        </div>
-
-        {/* Faixa 2 Marquee */}
-        <div className="faixa faixa2">
-          <div className="faixa-content">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <p key={i}>proposta ● &nbsp;</p>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Footer */}
-      <footer id="footer">
-        Camila's Cerimonial &copy; {new Date().getFullYear()} . Todos os direitos reservados.
+      <footer className="footer-clean">
+        <p style={{ marginBottom: '4px' }}>
+          Camila's Cerimonial &copy; {new Date().getFullYear()} . Todos os direitos reservados.
+        </p>
         <p>
           Desenvolvido por{' '}
-          <span
-            onClick={() =>
-              window.open('https://www.instagram.com/eu.gabrielvieira/', '_blank')
-            }
-          >
+          <span onClick={() => window.open('https://www.instagram.com/eu.gabrielvieira/', '_blank')}>
             Gabriel.
           </span>
         </p>
       </footer>
+
     </div>
   );
 }
