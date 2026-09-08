@@ -1,3 +1,14 @@
+import logo from '../logo.png';
+import eventPhoto12 from '../../images/12.webp';
+import eventPhoto10 from '../../images/10.webp';
+import eventPhoto15 from '../../images/15.webp';
+import eventPhoto13 from '../../images/13.webp';
+import eventPhoto05 from '../../images/05.webp';
+import eventPhoto06 from '../../images/06.webp';
+import eventPhoto07 from '../../images/07.webp';
+import eventPhoto08 from '../../images/08.webp';
+import eventPhoto09 from '../../images/09.webp';
+import eventPhoto02 from '../../images/02.webp';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -98,16 +109,16 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
   };
 
   const carouselImages = [
-    { url: '/images/12.webp', title: 'Casamentos Inesquecíveis' },
-    { url: '/images/10.webp', title: 'Momentos Mágicos' },
-    { url: '/images/15.webp', title: 'Festas de 15 Anos' },
-    { url: '/images/13.webp', title: 'Decoração & Sofisticação' },
-    { url: '/images/05.webp', title: 'Eventos Exclusivos' },
-    { url: '/images/06.webp', title: 'Cerimônias ao Ar Livre' },
-    { url: '/images/07.webp', title: 'Produção Completa' },
-    { url: '/images/08.webp', title: 'Atenção a Cada Detalhe' },
-    { url: '/images/09.webp', title: 'Sonhos Realizados' },
-    { url: '/images/02.webp', title: 'Equipe Especializada' },
+    { url: eventPhoto12, title: 'Casamentos Inesquecíveis' },
+    { url: eventPhoto10, title: 'Momentos Mágicos' },
+    { url: eventPhoto15, title: 'Festas de 15 Anos' },
+    { url: eventPhoto13, title: 'Decoração & Sofisticação' },
+    { url: eventPhoto05, title: 'Eventos Exclusivos' },
+    { url: eventPhoto06, title: 'Cerimônias ao Ar Livre' },
+    { url: eventPhoto07, title: 'Produção Completa' },
+    { url: eventPhoto08, title: 'Atenção a Cada Detalhe' },
+    { url: eventPhoto09, title: 'Sonhos Realizados' },
+    { url: eventPhoto02, title: 'Equipe Especializada' },
   ];
 
   if (loading) {
@@ -135,7 +146,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Header Bar */}
       <header className="header-nav">
         <a href="#" className="brand-logo-container" title="Camila's Cerimonial">
-          <img src="/src/logo.png" alt="Camila's Cerimonial Logo" className="brand-logo-img" />
+          <img src={logo} alt="Camila's Cerimonial Logo" className="brand-logo-img" />
           <div className="brand-name" style={{ fontSize: '18px' }}>Camila's Cerimonial</div>
         </a>
 
@@ -152,7 +163,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <img src="/src/logo.png" alt="Camila Cerimonial" className="profile-avatar" />
+        <img src={logo} alt="Camila Cerimonial" className="profile-avatar" />
 
         <h1 className="hero-title">
           Juntos transformando <span className="gold-accent">sonhos em realidade</span>
@@ -294,7 +305,7 @@ export default function LandingPage({ proposals, onSelectProposalForPdf }) {
       {/* Bottom Floating Bar */}
       <div className="bottom-callout-bar">
         <div className="callout-info">
-          <img src="/src/logo.png" alt="Logo" className="callout-avatar" />
+          <img src={logo} alt="Logo" className="callout-avatar" />
           <div className="callout-text">
             <h4>Faça seu Orçamento!</h4>
             <p>E nos permita transformar seus sonhos em realidade.</p>
