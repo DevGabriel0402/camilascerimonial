@@ -812,7 +812,7 @@ body {
 .password-visibility-toggle {
   position: absolute;
   top: 40%;
-  right: 8px;
+  right: 2px;
   transform: translateY(-50%);
   width: 36px;
   height: 36px;
@@ -826,7 +826,6 @@ body {
 
 .password-visibility-toggle:hover {
   color: var(--secondary-navy);
-  background: var(--primary-gold-light);
 }
 
 .password-visibility-toggle > input {
