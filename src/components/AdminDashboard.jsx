@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { updatePassword } from 'firebase/auth';
+import { auth } from '../firebase';
 import { defaultProposals } from '../App';
 import { maskCurrency } from '../utils/masks';
 import {
@@ -301,17 +303,39 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
     }
   };
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
     if (!newPassword) return;
     if (newPassword !== confirmPassword) {
       toast.error('As senhas não coincidem.');
       return;
     }
-    localStorage.setItem('adminPassword', newPassword);
-    toast.success('Senha alterada com sucesso!');
-    setNewPassword('');
-    setConfirmPassword('');
+    if (newPassword.length < 6) {
+      toast.error('A senha precisa ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error('Sua sessão expirou. Entre novamente para alterar a senha.');
+      return;
+    }
+
+    const toastId = toast.loading('Alterando senha no Firebase...');
+    try {
+      await updatePassword(user, newPassword);
+      localStorage.removeItem('adminPassword');
+      setNewPassword('');
+      setConfirmPassword('');
+      toast.success('Senha do Firebase alterada com sucesso!', { id: toastId });
+    } catch (err) {
+      console.error('Erro ao alterar senha do Firebase:', err.code);
+      if (err.code === 'auth/requires-recent-login') {
+        toast.error('Por segurança, saia e entre novamente antes de alterar a senha.', { id: toastId });
+      } else {
+        toast.error('Não foi possível alterar a senha. Tente novamente.', { id: toastId });
+      }
+    }
   };
 
   const handleSiteContentChange = async (updatedContent, save = false) => {
@@ -753,12 +777,12 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
         {activeTab === 'senha' && (
           <form onSubmit={handleChangePassword} className="form-clean" style={{ maxWidth: '400px', margin: 'auto', background: 'var(--bg-page)', padding: '25px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
             <h3 className="serif-title" style={{ fontSize: '18px', color: 'var(--secondary-navy)', marginBottom: '15px', textAlign: 'center' }}>
-              Alterar Senha do Administrador
+              Alterar Senha do Firebase
             </h3>
 
             <input
               type="password"
-              placeholder="Digite a nova senha..."
+              placeholder="Nova senha do Firebase..."
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
@@ -773,7 +797,7 @@ export default function AdminDashboard({ proposals, setProposals, siteContent = 
             />
 
             <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '6px' }}>
-              Salvar Nova Senha
+              Atualizar Senha no Firebase
             </button>
           </form>
         )}

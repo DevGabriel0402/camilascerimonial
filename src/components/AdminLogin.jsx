@@ -3,16 +3,15 @@ import { Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ArrowLeft, KeyRound, LogIn } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AdminLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -21,21 +20,23 @@ export default function AdminLogin({ onLoginSuccess }) {
     } catch (err) {
       console.error("Erro no Firebase Auth:", err.code, err.message);
 
+      let message;
       switch (err.code) {
         case 'auth/invalid-credential':
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-          setError('E-mail ou senha incorretos! Verifique suas credenciais.');
+          message = 'E-mail ou senha incorretos. Verifique suas credenciais.';
           break;
         case 'auth/invalid-email':
-          setError('Digite um endereço de e-mail válido.');
+          message = 'Digite um endereço de e-mail válido.';
           break;
         case 'auth/too-many-requests':
-          setError('Muitas tentativas. Tente novamente em alguns minutos.');
+          message = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
           break;
         default:
-          setError('Erro ao conectar. Verifique sua conexão e tente novamente.');
+          message = 'Erro ao conectar. Verifique sua conexão e tente novamente.';
       }
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -66,12 +67,6 @@ export default function AdminLogin({ onLoginSuccess }) {
             Acesso exclusivo ao painel de gestão.
           </p>
         </div>
-
-        {error && (
-          <div style={{ color: '#ef4444', fontSize: '13px', background: '#fee2e2', border: '1px solid #fca5a5', padding: '10px 14px', borderRadius: '8px', marginBottom: '14px', textAlign: 'center' }}>
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '12px' }}>
